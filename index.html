@@ -25,7 +25,7 @@ body{background:var(--bg);color:var(--txt);font:15px/1.6 var(--mono);overflow-x:
 a{color:var(--acc);text-decoration:none}
 a:hover{text-decoration:underline}
 ::selection{background:var(--acc);color:#000}
-#matrix{position:fixed;inset:0;z-index:0;opacity:.13;pointer-events:none}
+#matrix{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none}
 .wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px}
 
 /* nav */
@@ -39,7 +39,7 @@ nav ul a:hover{color:var(--acc);text-decoration:none}
 @media(max-width:640px){nav ul{gap:12px;font-size:12px}nav ul li.hide-sm{display:none}}
 
 /* hero */
-.hero{min-height:80vh;display:flex;flex-direction:column;justify-content:center;padding-block:60px}
+.hero{min-height:0;display:flex;flex-direction:column;justify-content:center;padding-block:60px}
 .tag{display:inline-block;border:1px solid var(--line);color:var(--mut);padding:4px 10px;border-radius:99px;font-size:12px;margin-bottom:22px}
 .tag i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-right:8px;box-shadow:0 0 10px var(--acc);animation:pulse 1.6s infinite}
 @keyframes pulse{50%{opacity:.3}}
@@ -106,7 +106,7 @@ section{padding:80px 0;border-top:1px solid var(--line)}
 .tab.on{background:var(--acc);color:var(--onacc);border-color:var(--acc);font-weight:600}
 .pane{display:none}
 .pane.on{display:block}
-input[type=text],input[type=number],select{font:inherit;background:var(--inset);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;outline:0}
+input[type=text],input[type=password],input[type=number],select{font:inherit;background:var(--inset);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;outline:0}
 input:focus,select:focus{border-color:var(--acc)}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .row>*{flex:1;min-width:140px}
@@ -145,8 +145,7 @@ footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--mut);fon
 footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--acc);color:var(--onacc);padding:10px 18px;border-radius:10px;font-weight:600;transition:.25s;z-index:50}
 .toast.on{transform:translateX(-50%) translateY(0)}
-.reveal{opacity:0;transform:translateY(20px);transition:.6s}
-.reveal.in{opacity:1;transform:none}
+
 /* v2 */
 textarea{font:inherit;background:var(--inset);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;outline:0;resize:vertical}
 textarea:focus{border-color:var(--acc)}
@@ -237,7 +236,7 @@ body.t-light #matrix{display:none}
 body.t-light .glitch::before,body.t-light .glitch::after{opacity:.35}
 body.t-light .stat,body.t-light .term{box-shadow:none}
 nav .wrap{gap:12px}
-nav .logo{white-space:nowrap;flex:0 0 auto}nav ul{flex:1 1 auto;justify-content:flex-end}
+nav .logo{white-space:nowrap;flex:0 0 auto}
 .navctl{display:flex;gap:6px;flex:0 0 auto}
 .navbtn{font:inherit;font-size:12px;cursor:pointer;background:transparent;border:1px solid var(--line);color:var(--mut);padding:4px 9px;border-radius:8px;white-space:nowrap}
 .navbtn:hover,.navbtn[aria-pressed=true]{color:var(--acc);border-color:var(--acc)}
@@ -444,48 +443,209 @@ h4.sub{font-size:14px;color:var(--acc);font-weight:600;margin-bottom:10px}
 .ach b{display:block;font-size:14px}.ach span{display:block;font-size:12px;color:var(--mut)}.ach em{font-style:normal;font-size:11px;color:var(--acc)}
 .gb-tail{padding:12px 16px;font-size:13px;min-height:44px}.gb-tail .t{color:var(--mut)}
 .giscus-box{margin-top:18px}
+/* обжимка */
+.cr-head{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.cr-head b{font-family:var(--disp);font-size:18px}.cr-head>div:first-child{min-width:0;flex:1 1 280px}
+.cr-hctl{display:flex;gap:8px;flex-wrap:wrap;min-width:0}.cr-hctl select{width:auto;max-width:100%}
+.cr-steps{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+.cr-st,.cr-end{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}
+.cr-end{border-color:var(--acc2);color:var(--acc2)}
+.cr-st.on{border-color:var(--acc);color:var(--acc)}.cr-st.done{color:var(--acc);opacity:.6}
+.cr-main{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:860px){.cr-main{grid-template-columns:minmax(0,1fr)}}
+#cr-cv{width:100%;height:auto;max-width:100%;border:1px solid var(--line);border-radius:12px;display:block}
+.cr-ctrl{display:grid;gap:10px;align-content:start;font-size:14px}
+.cr-ctrl .btn{justify-self:start}
+.cr-msg{color:var(--warn);font-size:13px;min-height:18px}
+.cr-wires{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.cr-w{font:inherit;cursor:pointer;background:var(--inset);border:1px solid var(--line);border-radius:8px;padding:6px 2px;display:grid;justify-items:center;gap:4px;color:var(--txt)}
+.cr-w.on{border-color:var(--acc);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 35%,transparent)}
+.cr-w i{width:14px;height:44px;border-radius:3px;display:block}
+.cr-w span{font-size:12px}.cr-w small{font-size:9px;color:var(--mut);line-height:1.1;text-align:center;word-break:break-word}
+@media(max-width:520px){.cr-w small{display:none}}
+.cr-hint{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;background:var(--inset);display:grid;gap:12px}
+.cr-std{display:grid;grid-template-columns:70px repeat(8,minmax(0,1fr));gap:4px;align-items:end}
+.cr-std b{color:var(--acc);align-self:center}
+.cr-std div{display:grid;justify-items:center;gap:3px}
+.cr-std i{width:16px;height:40px;border-radius:3px;display:block}
+.cr-std span{font-size:12px}.cr-std small{font-size:9.5px;color:var(--mut);text-align:center;line-height:1.1}
+@media(max-width:560px){.cr-std small{display:none}.cr-std{grid-template-columns:50px repeat(8,minmax(0,1fr))}}
+.cr-notes{list-style:none;display:grid;gap:6px;font-size:13px}.cr-notes b{color:var(--acc)}
+.cr-tester{display:grid;gap:8px;background:var(--inset);border:1px solid var(--line);border-radius:12px;padding:12px}
+.cr-tester div{display:grid;grid-template-columns:64px repeat(8,1fr);gap:6px;align-items:center}
+.cr-tester span{font-size:12px;color:var(--mut)}
+.cr-tester i{font-style:normal;font-size:11px;text-align:center;border-radius:50%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);color:var(--mut);max-width:30px}
+.cr-tester i.on{background:var(--acc);color:var(--onacc);border-color:var(--acc);box-shadow:0 0 10px var(--acc)}
+.cr-tester i.on.x{background:var(--bad);border-color:var(--bad);box-shadow:0 0 10px var(--bad)}
+/* ===== v5: разделы, хаб, анимации ===== */
+.navlinks-wrap{position:relative;flex:1 1 auto;min-width:0;display:flex;justify-content:center}
+nav ul{overflow-x:auto;scrollbar-width:none;padding:0 4px;position:relative}
+nav ul a[data-nav]{display:block;padding:18px 2px;color:var(--mut);transition:color .2s}
+nav ul a[data-nav].on,nav ul a[data-nav]:hover{color:var(--txt);text-decoration:none}
+#navbar{position:absolute;left:0;bottom:-1px;height:2px;background:var(--acc);box-shadow:0 0 12px var(--acc);border-radius:2px;transition:transform .45s cubic-bezier(.6,.05,.2,1),width .45s cubic-bezier(.6,.05,.2,1);pointer-events:none}
+.navbtn.panic{border-color:color-mix(in srgb,var(--bad) 50%,var(--line));color:var(--bad)}
+.navbtn.panic:hover{background:var(--bad);color:#fff;border-color:var(--bad)}
+@media(max-width:820px){nav .wrap{flex-wrap:wrap;height:auto;padding-block:8px 0;row-gap:0}nav .logo{display:block!important}.navlinks-wrap{order:3;flex-basis:100%;justify-content:flex-start;margin:0 -16px;padding:0 12px}nav ul a[data-nav]{padding:12px 2px}}
+@media(max-width:520px){nav .logo{display:none!important}.navctl{margin-left:auto}}
+@media(max-width:420px){.navctl .navbtn{font-size:10.5px;padding:3px 6px}}
+main#views{position:relative;z-index:1}
+.view{view-transition-name:page}
+::view-transition-old(page){animation:vOut .28s ease-in both}
+::view-transition-new(page){animation:vIn .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes vOut{to{opacity:0;transform:translateY(-12px) scale(.99);filter:blur(4px)}}
+@keyframes vIn{from{opacity:0;transform:translateY(22px);filter:blur(6px)}}
+.view.enter{animation:vIn .5s cubic-bezier(.2,.8,.2,1) both}
+.view-head{padding-block:64px 8px;position:relative}
+.crumbs,.crumbs-cur{font-size:13px;color:var(--mut)}.crumbs-cur{color:var(--acc)}
+.h1v{font-family:var(--disp);font-size:clamp(38px,7vw,76px);line-height:1;letter-spacing:-.02em;margin:10px 0 14px;text-wrap:balance}
+.view-head .lead{margin-bottom:18px}
+.vh-nav{display:flex;flex-wrap:wrap;gap:8px}
+.vh-nav .chip{text-decoration:none}
+.view-head+section{border-top:0;padding-top:36px}
+/* хаб */
+#hub{border-top:0;padding-top:20px}
+.hub{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media(max-width:900px){.hub{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.hub{grid-template-columns:minmax(0,1fr)}}
+.hub-card{--mx:50%;--my:50%;position:relative;display:grid;gap:8px;align-content:start;padding:22px;border-radius:18px;border:1px solid var(--line);background:radial-gradient(420px circle at var(--mx) var(--my),color-mix(in srgb,var(--acc) 12%,transparent),transparent 60%),var(--card);color:var(--txt);text-decoration:none;overflow:hidden;transition:transform .25s ease,border-color .25s,box-shadow .25s;transform-style:preserve-3d;min-height:190px}
+.hub-card:hover,.hub-card:focus-visible{text-decoration:none;border-color:color-mix(in srgb,var(--acc) 55%,var(--line));box-shadow:0 20px 50px -25px var(--acc);outline:0}
+.hub-card.big{grid-column:span 2;background:radial-gradient(520px circle at var(--mx) var(--my),color-mix(in srgb,var(--acc) 18%,transparent),transparent 60%),linear-gradient(135deg,color-mix(in srgb,var(--acc) 10%,var(--card)),var(--card) 60%)}
+.hub-card[data-k=me]{grid-column:span 2}
+@media(max-width:900px){.hub-card[data-k=me]{grid-column:auto}}
+@media(max-width:560px){.hub-card.big{grid-column:auto}}
+.hub-ic{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;background:var(--inset);transform:translateZ(30px)}
+.hub-ic svg{width:28px;height:28px;fill:none;stroke:var(--acc);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:160;stroke-dashoffset:0}
+.hub-card:hover .hub-ic svg{animation:draw 1s ease both}
+@keyframes draw{from{stroke-dashoffset:160}to{stroke-dashoffset:0}}
+.hub-t{font-family:var(--disp);font-size:22px;transform:translateZ(20px)}
+.hub-card.big .hub-t{font-size:clamp(24px,3.4vw,34px)}
+.hub-d{color:var(--mut);font-size:13.5px;line-height:1.5}
+.hub-m{font-size:12px;color:var(--acc);margin-top:auto}
+.hub-arrow{position:absolute;top:20px;right:22px;font-size:20px;color:var(--mut);transition:transform .25s,color .25s}
+.hub-card:hover .hub-arrow{transform:translateX(5px);color:var(--acc)}
+/* заставка */
+#boot{position:fixed;inset:0;z-index:100;background:#030504;color:#39ff88;font:13px/1.6 var(--mono);padding:28px 20px;display:flex;flex-direction:column;justify-content:flex-end;transition:opacity .5s,filter .5s;cursor:pointer}
+#boot pre{white-space:pre-wrap;margin:0;max-width:720px}
+.boot-logo{position:absolute;inset:0;display:grid;place-items:center;font:800 clamp(36px,9vw,96px) var(--disp);color:#e6f5ea;opacity:0;letter-spacing:-.02em}
+.boot-logo b{color:#39ff88}
+#boot.logo pre{opacity:.15;transition:opacity .3s}
+#boot.logo .boot-logo{animation:bootLogo .7s ease both}
+@keyframes bootLogo{0%{opacity:0;transform:scale(1.15);filter:blur(10px)}40%{opacity:1;filter:none}55%{transform:translateX(-4px);text-shadow:4px 0 #ff4d6d,-4px 0 #00d1ff}70%{transform:none;text-shadow:none}100%{opacity:1}}
+#boot.out{opacity:0;filter:blur(8px);pointer-events:none}
+.boot-skip{position:absolute;top:16px;right:20px;color:#3a6;font-size:12px}
+#cursor-glow{position:fixed;left:0;top:0;width:600px;height:600px;border-radius:50%;pointer-events:none;z-index:0;opacity:0;background:radial-gradient(circle,color-mix(in srgb,var(--acc) 9%,transparent),transparent 65%);transition:opacity .4s}
+body.t-light #cursor-glow{background:radial-gradient(circle,color-mix(in srgb,var(--acc) 7%,transparent),transparent 65%)}
+body.t-light #matrix{display:block;opacity:.35}
+.h2 .ttl,.h1v .ttl{display:inline-block}
+/* «для всех» */
+.fpane{display:none}.fpane.on{display:block;animation:vIn .4s ease both}
+.qz{display:grid;gap:16px;max-width:760px}
+.qz-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;font-size:13px;color:var(--mut);margin-bottom:14px}
+.qz-q{font-family:var(--disp);font-size:clamp(20px,3vw,28px);line-height:1.25;text-wrap:balance}
+.qz-a{display:grid;gap:8px}
+.qz-a .dk-opt{font-size:15px;padding:14px 16px;transition:transform .15s,border-color .15s}
+.qz-a .dk-opt:hover{transform:translateX(4px)}
+.dk-opt.picked{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,var(--bg2));color:var(--acc)}
+.qz-res{display:grid;gap:12px;max-width:760px}
+.qz-eyebrow{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+.qz-title{font-family:var(--disp);font-size:clamp(30px,5vw,48px);color:var(--acc);line-height:1.05}
+.qz-bars{display:grid;gap:6px;margin:6px 0}
+.qz-bars div{display:grid;grid-template-columns:190px minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:12.5px}
+.qz-bars em{font-style:normal;color:var(--mut);text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:520px){.qz-bars div{grid-template-columns:120px minmax(0,1fr) 40px}}
+.qz-tip{padding:12px 14px;border-left:3px solid var(--acc);background:var(--inset);border-radius:8px}
+.qz-res .row .btn,.qz-res>.btn{justify-self:start}
+.mail{max-width:720px;border:1px solid var(--line);border-radius:14px;background:var(--inset);overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.mail.is-ph{border-color:var(--bad);box-shadow:0 0 0 3px color-mix(in srgb,var(--bad) 20%,transparent)}
+.mail.is-ok{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 20%,transparent)}
+.mail-h{display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.mail-av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--acc2);color:var(--onacc);font-weight:800;flex:0 0 auto}
+.mail-a{color:var(--mut);word-break:break-all}.mail-to{font-size:12px;color:var(--mut)}
+.mail-s{padding:14px 16px 4px;font-weight:700;font-size:16px}
+.mail-b{padding:6px 16px 14px;font-size:14px;line-height:1.6}
+.mail-link{margin:0 16px 14px;font:inherit;cursor:pointer;background:var(--acc2);color:var(--onacc);border:0;border-radius:8px;padding:10px 18px;font-weight:700}
+.mail-att{margin:0 16px 14px;display:inline-block;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px}
+.mail-status{border-top:1px solid var(--line);padding:6px 16px;font-size:12px;color:var(--mut);background:var(--bg2);word-break:break-all;min-height:28px}
+.ph-btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.ph-btns .btn{min-width:150px}
+.ph-why{margin:8px 0 0 18px;display:grid;gap:4px;font-size:13.5px;color:var(--txt)}
+#ph-next{margin-top:12px}
+.pw-lock{padding:10px 14px;border:1px dashed var(--acc);border-radius:10px;font-size:13.5px;margin-bottom:14px}
+.pw-lock b{color:var(--acc)}
+.pw-meter{height:12px;margin:14px 0}
+.pw-meter i{transition:width .5s cubic-bezier(.2,.8,.2,1),background .3s}
+.pw-time{display:grid;gap:2px}.pw-time span{font-size:13px;color:var(--mut)}
+.pw-time b{font-family:var(--disp);font-size:clamp(24px,4vw,38px);line-height:1.15}
+.pw-time b.bad{color:var(--bad)}.pw-time b.warn{color:var(--warn)}.pw-time b.ok{color:var(--acc)}
+.pw-say{font-size:16px;margin:6px 0}
+.panic-card{margin-top:18px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:18px 20px;border:1px solid color-mix(in srgb,var(--bad) 45%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--bad) 6%,var(--card))}
+.panic-card>div{flex:1 1 280px;min-width:0}
+.panic-card b{font-family:var(--disp);font-size:18px}
+.panic-card .btn{background:var(--bad);border-color:var(--bad);color:#fff}
+/* паника: нарочно светлая офисная таблица */
+#panic{position:fixed;inset:0;z-index:200;background:#fff;color:#222;font:13px/1.3 "Segoe UI",Calibri,system-ui,sans-serif;display:flex;flex-direction:column;cursor:cell}
+.xl-bar{background:#1d6f42;color:#fff;padding:8px 14px;display:flex;align-items:center;gap:10px;font-size:13px}
+.xl-ic{width:20px;height:20px;border-radius:3px;background:#fff;color:#1d6f42;display:grid;place-items:center;font-weight:800;font-size:12px}
+.xl-save{margin-left:auto;opacity:.8;font-size:12px}
+.xl-menu{display:flex;gap:18px;padding:8px 14px;background:#f3f3f3;border-bottom:1px solid #ddd;overflow-x:auto;white-space:nowrap}
+.xl-menu .on{color:#1d6f42;border-bottom:2px solid #1d6f42;padding-bottom:2px}
+.xl-f{display:flex;gap:10px;align-items:center;padding:4px 10px;border-bottom:1px solid #ddd;font-size:13px}
+.xl-cell{width:60px;border:1px solid #ccc;padding:2px 6px}.xl-fx{color:#888;font-style:italic}
+.xl-grid{flex:1;overflow:auto}
+.xl-grid table{border-collapse:collapse;font-size:12.5px;min-width:100%}
+.xl-grid th{background:#f3f3f3;color:#555;font-weight:400;border:1px solid #dadada;padding:2px 8px;position:sticky;top:0}
+.xl-grid tbody th{position:static;width:36px;text-align:center}
+.xl-grid td{border:1px solid #e3e3e3;padding:3px 8px;min-width:90px;white-space:nowrap;color:#222}
+.xl-grid td.n{text-align:right;font-variant-numeric:tabular-nums}.xl-grid td.hd{font-weight:700;background:#e8f1ec}
+.xl-grid td.sel{outline:2px solid #1d6f42;outline-offset:-2px}
+.xl-tabs{display:flex;gap:2px;background:#f3f3f3;border-top:1px solid #ddd;padding:0 10px;font-size:12px}
+.xl-tabs span{padding:5px 14px}.xl-tabs .on{background:#fff;color:#1d6f42;font-weight:700;border-bottom:2px solid #1d6f42}
+.xl-st{background:#1d6f42;color:#fff;font-size:11px;padding:3px 12px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <canvas id="matrix"></canvas>
-
+<div id="boot" aria-hidden="true"><pre></pre><div class="boot-logo">&gt;_ <b>ne</b>-for.ru</div><span class="boot-skip">нажми любую клавишу</span></div>
+<script>try{if(sessionStorage.getItem('nefor-booted')||matchMedia('(prefers-reduced-motion: reduce)').matches)document.getElementById('boot').remove()}catch(e){}</script>
+<div id="cursor-glow" aria-hidden="true"></div>
 <nav><div class="wrap">
-  <a class="logo" href="#top">&gt;_ <b>ne</b>-for.ru</a>
-  <ul>
-    <li><a href="#term">терминал</a></li>
-    <li><a href="#tools">тулзы</a></li>
-    <li><a href="#mtconf">генераторы</a></li>
-    <li><a href="#rack">серверная</a></li>
-    <li><a href="#desk">деск</a></li>
-    <li><a href="#sims">симуляторы</a></li>
-    <li><a href="#game">игры</a></li>
-    <li><a href="#status">статус</a></li>
-    <li><a href="#blog">блог</a></li>
-    <li><a href="#ach">ачивки</a></li>
-    <li><a href="#guest">гостевая</a></li>
-  </ul>
-  <div class="navctl"><button class="navbtn" id="themeBtn" title="Сменить тему">тема</button><button class="navbtn" id="soundBtn" aria-pressed="false">звук: выкл</button></div>
+  <a class="logo" href="#home">&gt;_ <b>ne</b>-for.ru</a>
+  <div class="navlinks-wrap"><ul id="navlinks">
+    <li><a href="#home" data-nav="home">главная</a></li>
+    <li><a href="#fun" data-nav="fun">для всех</a></li>
+    <li><a href="#games" data-nav="games">игры</a></li>
+    <li><a href="#sims" data-nav="sims">симуляторы</a></li>
+    <li><a href="#tools" data-nav="tools">тулзы</a></li>
+    <li><a href="#gen" data-nav="gen">генераторы</a></li>
+    <li><a href="#blog" data-nav="blog">блог</a></li>
+    <li><a href="#me" data-nav="me">профиль</a></li>
+  </ul><i id="navbar" aria-hidden="true"></i></div>
+  <div class="navctl"><button class="navbtn" id="themeBtn" title="Сменить тему">тема</button><button class="navbtn" id="soundBtn" aria-pressed="false">звук: выкл</button><button class="navbtn panic" id="panicBtn" title="Паника! Клавиша Ё">паника</button></div>
 </div></nav>
 
+<main id="views">
+<div class="view" id="v-home" hidden>
 <header class="hero wrap" id="top">
   <div><span class="tag"><i></i>uptime: <span id="uptime">0с</span> · всё работает (пока)</span></div>
   <h1><span class="glitch" data-t="ne-for"><span class="ne">ne</span>-for</span><br>.ru</h1>
   <p class="sub">Сайт <b>не для всех</b>. <span class="typed" id="typed"></span></p>
   <div class="cta">
     <a class="btn" href="#term">Открыть терминал</a>
-    <a class="btn ghost" href="#game">Спасти сеть</a>
+    <a class="btn ghost" href="#fun">Для всех</a>
   </div>
   <div class="stats">
     <div class="stat"><b id="cof">3</b><span>кофе сегодня</span></div>
     <div class="stat"><b>99.9%</b><span>аптайм (в отчётах)</span></div>
     <div class="stat"><b>0</b><span>тикетов «срочно» (ложь)</span></div>
   </div>
-  <div class="story"><div class="story-h"><span>история из саппорта <em id="story-n"></em></span><span><button class="navbtn" id="story-prev" aria-label="предыдущая">←</button> <button class="navbtn" id="story-next">ещё байка →</button></span></div><p id="story-t"></p></div>
+  <div class="story"><div class="story-h"><span>история из саппорта <em id="story-n"></em></span><span><button class="navbtn" id="story-prev" aria-label="предыдущая">←</button> <button class="navbtn" id="story-next">ещё байка →</button> <button class="navbtn" id="story-gen">сгенерировать</button></span></div><p id="story-t"></p></div>
 </header>
-
-<section id="term"><div class="wrap reveal">
-  <div class="h2"><small>// 01</small>Терминал</div>
+<section id="hub"><div class="wrap"><div class="h2"><small>~/</small><span class="ttl">Куда пойдём?</span></div>
+  <div class="hub"><a class="hub-card big" href="#fun" data-k="fun"><span class="hub-ic"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M17 20h.01M31 20h.01"/><path d="M16 29c2.5 4 13.5 4 16 0"/></svg></span><span class="hub-t">Для всех</span><span class="hub-d">Тест «Какой ты пользователь», фишинг или нет, проверка пароля. Понятно без всякого IT.</span><span class="hub-m">начни отсюда</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#games" data-k="games"><span class="hub-ic"><svg viewBox="0 0 48 48"><rect x="6" y="14" width="36" height="22" rx="10"/><path d="M15 21v8M11 25h8"/><path d="M31 23h.01M35 27h.01"/></svg></span><span class="hub-t">Игры</span><span class="hub-d">Кто положил сеть, змейка, сапёр, звонки на линию и смена в сервис-деске.</span><span class="hub-m">5 игр</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#sims" data-k="sims"><span class="hub-ic"><svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="36" rx="3"/><path d="M10 18h28M10 30h28"/><path d="M15 12h8M15 24h8M15 36h8"/><path d="M32 12h.01M32 24h.01M32 36h.01"/></svg></span><span class="hub-t">Симуляторы</span><span class="hub-d">Инцидент в 3 ночи, firewall, сборка сети, обжимка RJ45, серверная, сервер-тамагочи.</span><span class="hub-m">6 симуляторов</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#tools" data-k="tools"><span class="hub-ic"><svg viewBox="0 0 48 48"><path d="M29 8a9 9 0 0 0-8 13L8 34a3 3 0 0 0 4 4l13-13a9 9 0 0 0 13-8l-6 2-4-4 2-6z"/></svg></span><span class="hub-t">Тулзы</span><span class="hub-d">Подсети, пароли, DNS, cron, regex, diff, хэши, ИБП и PoE, проверка сайта, статус сервисов.</span><span class="hub-m" data-count="tools"># инструментов</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#gen" data-k="gen"><span class="hub-ic"><svg viewBox="0 0 48 48"><path d="M17 14 7 24l10 10M31 14l10 10-10 10M27 9l-6 30"/></svg></span><span class="hub-t">Генераторы</span><span class="hub-d">Конфиг MikroTik, скрипты PowerShell, инструкции для пользователей.</span><span class="hub-m" data-count="gen"># генератора</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#blog" data-k="blog"><span class="hub-ic"><svg viewBox="0 0 48 48"><path d="M12 6h18l8 8v28H12z"/><path d="M30 6v8h8M17 22h14M17 29h14M17 36h9"/></svg></span><span class="hub-t">Блог</span><span class="hub-d">Заметки по MikroTik, AD, Zabbix и GLPI: то, что потом гуглишь сам у себя.</span><span class="hub-m" data-count="blog">заметки</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#me" data-k="me"><span class="hub-ic"><svg viewBox="0 0 48 48"><path d="M16 8h16v10a8 8 0 0 1-16 0z"/><path d="M16 11H9a7 7 0 0 0 7 9M32 11h7a7 7 0 0 1-7 9M24 26v8M17 40h14l-2-6H19z"/></svg></span><span class="hub-t">Профиль</span><span class="hub-d">Достижения за всё, что сделал на сайте, и гостевая книга.</span><span class="hub-m">ачивки</span><span class="hub-arrow" aria-hidden="true">→</span></a></div>
+</div></section>
+<section id="term"><div class="wrap">
+  <div class="h2"><small>~/terminal</small><span class="ttl">Терминал</span></div>
   <p class="lead">Настоящий™ шелл. Введи <b>help</b> или тыкни команду ниже.</p>
   <div class="term">
     <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span>guest@ne-for: ~</span></div>
@@ -494,10 +654,104 @@ h4.sub{font-size:14px;color:var(--acc);font-weight:600;margin-bottom:10px}
   </div>
   <div class="chips" id="chips"></div>
 </div></section>
+</div>
+<div class="view" id="v-fun" hidden>
+<div class="view-head"><div class="wrap"><a class="crumbs" href="#home">~/</a><span class="crumbs-cur">fun</span><div class="h1v"><span class="ttl">Для всех</span></div><p class="lead">Минута на каждую штуку, никаких знаний IT не нужно. Проверь себя и отправь коллегам.</p></div></div>
+<section id="fun"><div class="wrap">
+  <div class="tabs" id="ftabs"><button class="tab on" data-f="quiz">Какой ты пользователь</button><button class="tab" data-f="phish">Фишинг или нет</button><button class="tab" data-f="pass">Сколько будут ломать пароль</button></div>
+  <div class="fpane card on" id="f-quiz"></div>
+  <div class="fpane card" id="f-phish"></div>
+  <div class="fpane card" id="f-pass">
+    <p class="pw-lock"><b>Пароль никуда не отправляется.</b> Всё считается прямо в твоём браузере, можно проверить даже без интернета.</p>
+    <div class="row"><input type="password" id="pw-in" placeholder="Введи пароль" autocomplete="off" spellcheck="false" aria-label="Пароль для проверки"><button class="btn ghost" id="pw-show" style="flex:0 0 auto">показать</button></div>
+    <div class="meter pw-meter"><i id="pw-bar"></i></div>
+    <div id="pw-out"></div>
+    <p class="muted" style="font-size:13px">Нужен надёжный пароль? <a href="#tools">Генератор паролей в тулзах</a>.</p>
+  </div>
+  <div class="panic-card"><div><b>Кнопка «Паника»</b><p class="muted">Начальник подошёл? Жми клавишу Ё или кнопку: сайт мгновенно превратится в скучную таблицу с отчётом. Любая клавиша вернёт обратно.</p></div><button class="btn" id="panic-go" style="flex:0 0 auto">Попробовать</button></div>
+</div></section>
+</div>
+<div class="view" id="v-games" hidden>
+<div class="view-head"><div class="wrap"><a class="crumbs" href="#home">~/</a><span class="crumbs-cur">games</span><div class="h1v"><span class="ttl">Игры</span></div><p class="lead">Короткие игры на перерыв: от змейки до смены на первой линии поддержки.</p><div class="vh-nav"><a class="chip" href="#game">Кто положил сеть</a><a class="chip" href="#arcade">Аркада</a><a class="chip" href="#desk">Сервис-деск</a></div></div></div>
+<section id="game"><div class="wrap">
+  <div class="h2"><small>~/games/network</small><span class="ttl">Кто положил сеть?</span></div>
+  <p class="lead">Порты на коммутаторе падают. Кликай по <span style="color:var(--bad)">красным</span>, чтобы поднять. <span style="color:var(--warn)">Жёлтый</span> — бухгалтерия, даёт +5, но надо кликнуть трижды. Упадёт больше половины — ты уволен.</p>
+  <div class="game-top">
+    <div class="hud"><span>Очки: <b id="gs">0</b></span><span>Время: <b id="gt">45</b>с</span><span>Рекорд: <b id="gb">0</b></span></div>
+    <button class="btn" id="gstart">Старт смены</button>
+  </div>
+  <div class="switch" id="sw"></div>
+  <div class="gmsg" id="gmsg">Смена ещё не началась. Кофе налит.</div>
+</div></section>
+<section id="arcade"><div class="wrap">
+  <div class="h2"><small>~/games/arcade</small><span class="ttl">Аркада</span></div>
+  <p class="lead">Когда тикеты закрыты (никогда).</p>
+  <div class="tabs" id="atabs">
+    <button class="tab on" data-a="snake">Змейка по кабель-каналу</button>
+    <button class="tab" data-a="mine">Сапёр в серверной</button>
+    <button class="tab" data-a="call">Звонок на линию</button>
+  </div>
 
+  <div class="apane card on" id="a-snake">
+    <div class="game-top"><div class="hud"><span>Пакеты: <b id="ss">0</b></span><span>Рекорд: <b id="sb">0</b></span></div><button class="btn" id="sstart">Старт</button></div>
+    <canvas id="snake" width="480" height="320"></canvas>
+    <div class="dpad"><button data-d="up">↑</button><button data-d="left">←</button><button data-d="down">↓</button><button data-d="right">→</button></div>
+    <p class="gmsg">Стрелки/WASD или свайпы. Собирай пакеты, не врезайся в стойку. Пробел — пауза.</p>
+  </div>
 
-<section id="tools"><div class="wrap reveal">
-  <div class="h2"><small>// 02</small>Тулзы</div>
+  <div class="apane card" id="a-mine">
+    <div class="game-top"><div class="hud"><span>Мин: <b id="mleft">15</b></span><span>Время: <b id="mt">0</b>с</span></div>
+      <div class="row" style="flex:0 0 auto"><button class="btn ghost" id="mflag" style="flex:0 0 auto">Режим: копать</button><button class="btn" id="mnew" style="flex:0 0 auto">Новая</button></div></div>
+    <div class="mine" id="mine"></div>
+    <p class="gmsg" id="mmsg">Где-то в серверной 15 сгоревших блоков питания. ПКМ или «режим флажка» — пометить.</p>
+  </div>
+
+  <div class="apane card" id="a-call">
+    <div class="game-top"><div class="hud"><span>Карма: <b id="ck">50</b></span><span>Звонок: <b id="cn">1</b>/8</span></div><button class="btn" id="cnew" style="flex:0 0 auto">Сначала</button></div>
+    <div class="phone"><div class="caller" id="cwho"></div><div class="bubble" id="cq"></div></div>
+    <div class="answers" id="cans"></div>
+    <p class="gmsg" id="cmsg"></p>
+  </div>
+</div></section>
+<section id="desk"><div class="wrap">
+  <div class="h2"><small>~/games/servicedesk</small><span class="ttl">Сервис-деск</span></div>
+  <p class="lead">Смена на первой линии. Заявки падают в очередь, у каждой тикает SLA. Отвечай, уточняй, проси AnyDesk и закрывай, пока пользователи не пошли к директору.</p>
+  <div class="game-top"><div class="hud" id="dk-hud"></div><div class="row" style="flex:0 0 auto;align-items:center"><span class="dk-clock" id="dk-clock">00:00</span><button class="btn" id="dk-start" style="flex:0 0 auto">Начать смену</button></div></div>
+  <div class="dk">
+    <div class="dk-queue card" id="dk-queue"></div>
+    <div class="dk-chat card" id="dk-chat"></div>
+  </div>
+</div></section>
+</div>
+<div class="view" id="v-sims" hidden>
+<div class="view-head"><div class="wrap"><a class="crumbs" href="#home">~/</a><span class="crumbs-cur">sims</span><div class="h1v"><span class="ttl">Симуляторы</span></div><p class="lead">Работа админа, только без последствий: ночные аварии, firewall, проектирование сети, обжимка кабеля.</p><div class="vh-nav"><a class="chip" href="#sims">Симуляторы</a><a class="chip" href="#rack">Серверная</a></div></div></div>
+<section id="sims"><div class="wrap">
+  <div class="h2"><small>~/sims</small><span class="ttl">Симуляторы</span></div>
+  <p class="lead">Ночные аварии, firewall, проектирование сети, обжимка кабеля и сервер, за которым надо ухаживать.</p>
+  <div class="tabs" id="stabs"><button class="tab on" data-s="inc">Инцидент в 3 ночи</button><button class="tab" data-s="fw">Firewall-тренажёр</button><button class="tab" data-s="net">Собери сеть офиса</button><button class="tab" data-s="crimp">Обжимка RJ45</button><button class="tab" data-s="tama">Сервер-тамагочи</button></div>
+  <div class="spane card on" id="s-inc"></div>
+  <div class="spane card" id="s-fw"></div>
+  <div class="spane card" id="s-net"></div>
+  <div class="spane card" id="s-crimp"></div>
+  <div class="spane card" id="s-tama"></div>
+</div></section>
+<section id="rack"><div class="wrap">
+  <div class="h2"><small>~/sims/rack</small><span class="ttl">Серверная</span></div>
+  <p class="lead">Стойка на 12 юнитов. Кликни по железке: покажет нагрузку и живые логи, её можно перезагрузить. Ниже мини-игра про кабели.</p>
+  <div class="rackwrap">
+    <div class="rackcol"><canvas id="rackcv" width="100" height="148" aria-label="Стойка с оборудованием"></canvas><div class="rackenv" id="rackenv"></div><button class="navbtn" id="humBtn" aria-pressed="false">гул серверной: выкл</button></div>
+    <div class="card rackinfo" id="rackinfo"></div>
+  </div>
+  <div class="h3">Кабель-менеджмент</div>
+  <p class="lead">Растаскивай коннекторы так, чтобы кабели нигде не пересекались. Пересекающиеся подсвечены красным.</p>
+  <div class="game-top"><div class="hud"><span>Уровень: <b id="unl">1</b></span><span>Пересечений: <b id="unx">0</b></span><span>Ходов: <b id="unm">0</b></span></div><div class="row" style="flex:0 0 auto"><button class="btn ghost" id="unreset" style="flex:0 0 auto">Перемешать</button><button class="btn" id="unnext" style="flex:0 0 auto" hidden>Следующий уровень</button></div></div>
+  <canvas id="uncv" width="900" height="480" aria-label="Игра: распутай кабели"></canvas>
+</div></section>
+</div>
+<div class="view" id="v-tools" hidden>
+<div class="view-head"><div class="wrap"><a class="crumbs" href="#home">~/</a><span class="crumbs-cur">tools</span><div class="h1v"><span class="ttl">Тулзы</span></div><p class="lead">Полезное на каждый день. Всё считается в браузере, никуда ничего не улетает.</p><div class="vh-nav"><a class="chip" href="#tools">Инструменты</a><a class="chip" href="#status">Всё ли упало?</a></div></div></div>
+<section id="tools"><div class="wrap">
+  <div class="h2"><small>~/tools</small><span class="ttl">Тулзы</span></div>
   <p class="lead">Полезное. Всё считается в браузере, никуда ничего не улетает.</p>
   <div class="tabs" id="tabs">
     <button class="tab on" data-p="subnet">Калькулятор подсетей</button>
@@ -657,9 +911,17 @@ Sep 29 10:15:11 gw ppp: sstp-hub connected from 95.163.244.138</textarea>
     </div>
   </div>
 </div></section>
-
-<section id="mtconf"><div class="wrap reveal">
-  <div class="h2"><small>// 03</small>Генераторы</div>
+<section id="status"><div class="wrap">
+  <div class="h2"><small>~/tools/status</small><span class="ttl">Всё ли упало?</span></div>
+  <p class="lead">Живая проверка из <b>твоего</b> браузера: время ответа до сервисов, раз в 15 секунд. Если «лежит» — может, это у тебя, а может, у всех.</p>
+  <div class="game-top"><div class="hud"><span>Проверок: <b id="stc">0</b></span><span>Живо: <b id="stup">—</b></span></div><button class="btn ghost" id="stgo" style="flex:0 0 auto">Проверить сейчас</button></div>
+  <div class="stgrid" id="stgrid"></div>
+  <p class="gmsg" style="font-size:12px">Замер = время загрузки favicon через fetch (no-cors). Это не ICMP, а честный «доходит ли браузер» с учётом DNS и TLS.</p>
+</div></section>
+</div>
+<div class="view" id="v-gen" hidden>
+<div class="view-head"><div class="wrap"><a class="crumbs" href="#home">~/</a><span class="crumbs-cur">gen</span><div class="h1v"><span class="ttl">Генераторы</span></div><p class="lead">Заполни форму и получи готовый конфиг, скрипт или инструкцию для пользователей.</p></div></div>
+<section id="mtconf"><div class="wrap">
   <p class="lead">Заполни форму и получи готовый конфиг, скрипт или инструкцию для пользователей. Всё собирается в браузере.</p>
   <div class="tabs" id="gtabs"><button class="tab on" data-g="mt">MikroTik</button><button class="tab" data-g="ps">PowerShell</button><button class="tab" data-g="guide">Инструкции для пользователей</button></div>
   <div class="gpane on" id="g-mt"><p class="muted" style="margin-bottom:14px">Заполни форму и получи скрипт для RouterOS 7. Он рассчитан на чистый роутер после <code>/system reset-configuration no-defaults=yes</code>. Перед применением прочитай, что вставляешь.</p>
@@ -707,119 +969,43 @@ Sep 29 10:15:11 gw ppp: sstp-hub connected from 95.163.244.138</textarea>
   <div class="gpane" id="g-ps"></div>
   <div class="gpane" id="g-guide"></div>
 </div></section>
-
-<section id="rack"><div class="wrap reveal">
-  <div class="h2"><small>// 04</small>Серверная</div>
-  <p class="lead">Стойка на 12 юнитов. Кликни по железке: покажет нагрузку и живые логи, её можно перезагрузить. Ниже мини-игра про кабели.</p>
-  <div class="rackwrap">
-    <div class="rackcol"><canvas id="rackcv" width="100" height="148" aria-label="Стойка с оборудованием"></canvas><div class="rackenv" id="rackenv"></div><button class="navbtn" id="humBtn" aria-pressed="false">гул серверной: выкл</button></div>
-    <div class="card rackinfo" id="rackinfo"></div>
-  </div>
-  <div class="h3">Кабель-менеджмент</div>
-  <p class="lead">Растаскивай коннекторы так, чтобы кабели нигде не пересекались. Пересекающиеся подсвечены красным.</p>
-  <div class="game-top"><div class="hud"><span>Уровень: <b id="unl">1</b></span><span>Пересечений: <b id="unx">0</b></span><span>Ходов: <b id="unm">0</b></span></div><div class="row" style="flex:0 0 auto"><button class="btn ghost" id="unreset" style="flex:0 0 auto">Перемешать</button><button class="btn" id="unnext" style="flex:0 0 auto" hidden>Следующий уровень</button></div></div>
-  <canvas id="uncv" width="900" height="480" aria-label="Игра: распутай кабели"></canvas>
-</div></section>
-
-<section id="game"><div class="wrap reveal">
-  <div class="h2"><small>// 05</small>Кто положил сеть?</div>
-  <p class="lead">Порты на коммутаторе падают. Кликай по <span style="color:var(--bad)">красным</span>, чтобы поднять. <span style="color:var(--warn)">Жёлтый</span> — бухгалтерия, даёт +5, но надо кликнуть трижды. Упадёт больше половины — ты уволен.</p>
-  <div class="game-top">
-    <div class="hud"><span>Очки: <b id="gs">0</b></span><span>Время: <b id="gt">45</b>с</span><span>Рекорд: <b id="gb">0</b></span></div>
-    <button class="btn" id="gstart">Старт смены</button>
-  </div>
-  <div class="switch" id="sw"></div>
-  <div class="gmsg" id="gmsg">Смена ещё не началась. Кофе налит.</div>
-</div></section>
-
-
-<section id="arcade"><div class="wrap reveal">
-  <div class="h2"><small>// 06</small>Аркада</div>
-  <p class="lead">Когда тикеты закрыты (никогда).</p>
-  <div class="tabs" id="atabs">
-    <button class="tab on" data-a="snake">Змейка по кабель-каналу</button>
-    <button class="tab" data-a="mine">Сапёр в серверной</button>
-    <button class="tab" data-a="call">Звонок на линию</button>
-  </div>
-
-  <div class="apane card on" id="a-snake">
-    <div class="game-top"><div class="hud"><span>Пакеты: <b id="ss">0</b></span><span>Рекорд: <b id="sb">0</b></span></div><button class="btn" id="sstart">Старт</button></div>
-    <canvas id="snake" width="480" height="320"></canvas>
-    <div class="dpad"><button data-d="up">↑</button><button data-d="left">←</button><button data-d="down">↓</button><button data-d="right">→</button></div>
-    <p class="gmsg">Стрелки/WASD или свайпы. Собирай пакеты, не врезайся в стойку. Пробел — пауза.</p>
-  </div>
-
-  <div class="apane card" id="a-mine">
-    <div class="game-top"><div class="hud"><span>Мин: <b id="mleft">15</b></span><span>Время: <b id="mt">0</b>с</span></div>
-      <div class="row" style="flex:0 0 auto"><button class="btn ghost" id="mflag" style="flex:0 0 auto">Режим: копать</button><button class="btn" id="mnew" style="flex:0 0 auto">Новая</button></div></div>
-    <div class="mine" id="mine"></div>
-    <p class="gmsg" id="mmsg">Где-то в серверной 15 сгоревших блоков питания. ПКМ или «режим флажка» — пометить.</p>
-  </div>
-
-  <div class="apane card" id="a-call">
-    <div class="game-top"><div class="hud"><span>Карма: <b id="ck">50</b></span><span>Звонок: <b id="cn">1</b>/8</span></div><button class="btn" id="cnew" style="flex:0 0 auto">Сначала</button></div>
-    <div class="phone"><div class="caller" id="cwho"></div><div class="bubble" id="cq"></div></div>
-    <div class="answers" id="cans"></div>
-    <p class="gmsg" id="cmsg"></p>
-  </div>
-</div></section>
-
-<section id="desk"><div class="wrap reveal">
-  <div class="h2"><small>// 07</small>Сервис-деск</div>
-  <p class="lead">Смена на первой линии. Заявки падают в очередь, у каждой тикает SLA. Отвечай, уточняй, проси AnyDesk и закрывай, пока пользователи не пошли к директору.</p>
-  <div class="game-top"><div class="hud" id="dk-hud"></div><div class="row" style="flex:0 0 auto;align-items:center"><span class="dk-clock" id="dk-clock">00:00</span><button class="btn" id="dk-start" style="flex:0 0 auto">Начать смену</button></div></div>
-  <div class="dk">
-    <div class="dk-queue card" id="dk-queue"></div>
-    <div class="dk-chat card" id="dk-chat"></div>
-  </div>
-</div></section>
-
-<section id="sims"><div class="wrap reveal">
-  <div class="h2"><small>// 08</small>Симуляторы</div>
-  <p class="lead">Ночные аварии, firewall, проектирование сети и сервер, за которым надо ухаживать.</p>
-  <div class="tabs" id="stabs"><button class="tab on" data-s="inc">Инцидент в 3 ночи</button><button class="tab" data-s="fw">Firewall-тренажёр</button><button class="tab" data-s="net">Собери сеть офиса</button><button class="tab" data-s="tama">Сервер-тамагочи</button></div>
-  <div class="spane card on" id="s-inc"></div>
-  <div class="spane card" id="s-fw"></div>
-  <div class="spane card" id="s-net"></div>
-  <div class="spane card" id="s-tama"></div>
-</div></section>
-
-<section id="status"><div class="wrap reveal">
-  <div class="h2"><small>// 09</small>Всё ли упало?</div>
-  <p class="lead">Живая проверка из <b>твоего</b> браузера: время ответа до сервисов, раз в 15 секунд. Если «лежит» — может, это у тебя, а может, у всех.</p>
-  <div class="game-top"><div class="hud"><span>Проверок: <b id="stc">0</b></span><span>Живо: <b id="stup">—</b></span></div><button class="btn ghost" id="stgo" style="flex:0 0 auto">Проверить сейчас</button></div>
-  <div class="stgrid" id="stgrid"></div>
-  <p class="gmsg" style="font-size:12px">Замер = время загрузки favicon через fetch (no-cors). Это не ICMP, а честный «доходит ли браузер» с учётом DNS и TLS.</p>
-</div></section>
-
-<section id="blog"><div class="wrap reveal">
-  <div class="h2"><small>// 10</small>Заметки</div>
+</div>
+<div class="view" id="v-blog" hidden>
+<div class="view-head"><div class="wrap"><a class="crumbs" href="#home">~/</a><span class="crumbs-cur">blog</span><div class="h1v"><span class="ttl">Блог</span></div><p class="lead">Коротко и по делу: то, что потом гуглишь сам у себя.</p></div></div>
+<section id="blog"><div class="wrap">
   <p class="lead">Коротко и по делу — то, что потом гуглишь сам у себя.</p>
   <div class="tabs" id="btags"></div>
   <div class="posts" id="posts"><p style="color:var(--mut)">Загружаю...</p></div>
 </div></section>
-
-<div class="reader" id="reader" hidden><div class="reader-in"><button class="rclose" id="rclose" aria-label="закрыть">✕</button><article class="md" id="rbody"></article></div></div>
-
-<section id="ach"><div class="wrap reveal">
-  <div class="h2"><small>// 11</small>Достижения</div>
+</div>
+<div class="view" id="v-me" hidden>
+<div class="view-head"><div class="wrap"><a class="crumbs" href="#home">~/</a><span class="crumbs-cur">me</span><div class="h1v"><span class="ttl">Профиль</span></div><p class="lead">Твои достижения на сайте и гостевая книга.</p><div class="vh-nav"><a class="chip" href="#ach">Достижения</a><a class="chip" href="#guest">Гостевая книга</a></div></div></div>
+<section id="ach"><div class="wrap">
+  <div class="h2"><small>~/me/achievements</small><span class="ttl">Достижения</span></div>
   <p class="lead">Открываются за действия на сайте. Хранятся в твоём браузере. Открыто: <b id="achcount"></b></p>
   <div class="meter" style="max-width:420px;margin-bottom:22px"><i id="achbar" style="width:0"></i></div>
   <div class="achgrid" id="achgrid"></div>
 </div></section>
-
-<section id="guest"><div class="wrap reveal">
-  <div class="h2"><small>// 12</small>Логи посетителей</div>
+<section id="guest"><div class="wrap">
+  <div class="h2"><small>~/me/guestbook</small><span class="ttl">Логи посетителей</span></div>
   <p class="lead">Гостевая книга. Оставь строчку в журнале: нужен аккаунт GitHub.</p>
   <div class="term"><div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span>tail -f /var/log/visitors.log</span></div><div class="gb-tail" id="gb-tail"></div></div>
   <div id="giscus" class="giscus-box"></div>
 </div></section>
+</div>
+</main>
+
+<div class="reader" id="reader" hidden><div class="reader-in"><button class="rclose" id="rclose" aria-label="закрыть">✕</button><article class="md" id="rbody"></article></div></div>
 
 <footer><div class="wrap">
   <span>© <span id="yr"></span> ne-for.ru — не для всех, но для тебя можно</span>
   <span>сделано руками и чуть-чуть скриптом · <a href="#top">наверх ↑</a></span>
 </div></footer>
 <div class="hack" id="hack" hidden><div class="hackhint">жми любые клавиши · Esc — выход</div><pre id="hackpre"></pre><div class="granted" id="granted" hidden>ACCESS GRANTED</div></div>
+<div id="panic" hidden><div class="xl-bar"><span class="xl-ic">X</span> Отчёт_продажи_Q3.xlsx <span class="xl-save">Сохранено</span></div>
+<div class="xl-menu"><span>Файл</span><span class="on">Главная</span><span>Вставка</span><span>Разметка</span><span>Формулы</span><span>Данные</span><span>Рецензирование</span><span>Вид</span></div>
+<div class="xl-f"><span class="xl-cell">H3</span><span class="xl-fx">fx</span><span>=СУММ(B3:G3)</span></div><div class="xl-grid"></div>
+<div class="xl-tabs"><span class="on">Продажи</span><span>Регионы</span><span>Сводная</span><span>Лист1</span></div><div class="xl-st">Готово</div></div>
 <div class="toast" id="toast">Скопировано</div>
 
 <script>
@@ -829,12 +1015,6 @@ const toast=(t='Скопировано')=>{const e=$('#toast');e.textContent=t;e
 const copy=t=>{navigator.clipboard?.writeText(t).then(()=>toast()).catch(()=>toast('Не вышло скопировать'))};
 $('#yr').textContent=new Date().getFullYear();
 
-/* matrix bg */
-(()=>{const c=$('#matrix'),x=c.getContext('2d');let w,h,cols,d;const ch='01ｱｲｳｴｵｶｷｸｹｺ<>/{}#$%ネフォ';
-const rs=()=>{w=c.width=innerWidth;h=c.height=innerHeight;cols=Math.floor(w/16);d=Array(cols).fill(0).map(()=>Math.random()*-50)};rs();addEventListener('resize',rs);
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function f(){x.fillStyle='rgba(7,9,10,.12)';x.fillRect(0,0,w,h);x.fillStyle=getComputedStyle(document.body).getPropertyValue('--acc').trim()||'#39ff88';x.font='14px monospace';
-d.forEach((y,i)=>{x.fillText(rnd(ch),i*16,y*16);d[i]=y*16>h&&Math.random()>.975?0:y+1});if(!reduce)setTimeout(()=>requestAnimationFrame(f),50)}f()})();
 
 /* uptime + typed */
 const t0=Date.now();setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$('#uptime').textContent=s<60?s+'с':Math.floor(s/60)+'м '+s%60+'с'},1000);
@@ -924,6 +1104,7 @@ help:()=>`<span class="c">Доступно:</span>
   incident   инцидент в 3 ночи
   firewall   firewall-тренажёр
   pet        сервер-питомец
+  crimp      обжать RJ45
   ps         генератор PowerShell
   story      байка из саппорта
   ach        достижения
@@ -994,6 +1175,9 @@ clearInterval(timer);timer=setInterval(()=>{$('#gt').textContent=--time;if(time<
 <script src="assets/v3.js"></script>
 <script src="assets/desk.js"></script>
 <script src="assets/sims.js"></script>
+<script src="assets/crimp.js"></script>
 <script src="assets/gen.js"></script>
+<script src="assets/fun.js"></script>
+<script src="assets/ui.js"></script>
 </body>
 </html>
