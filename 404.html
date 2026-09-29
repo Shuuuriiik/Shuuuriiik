@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 — ne-for.ru</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230078d7'/><text x='50%25' y='58%25' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif' font-size='36' fill='white'>:(</text></svg>">
+<style>
+:root{--bsod:#0078d7;--fg:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bsod);color:var(--fg);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;display:flex;align-items:center;padding:24px clamp(16px,8vw,120px)}
+main{max-width:900px}
+.sad{font-size:clamp(90px,16vw,160px);line-height:1;font-weight:300;margin-bottom:28px}
+h1{font-size:clamp(20px,3vw,28px);font-weight:400;line-height:1.35;max-width:760px}
+.pct{font-size:clamp(20px,3vw,28px);margin:26px 0 36px;font-variant-numeric:tabular-nums}
+.foot{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+#qr{background:#fff;padding:6px;width:112px;height:112px;flex:0 0 auto}
+#qr canvas{width:100%;height:100%;image-rendering:pixelated;display:block}
+.small{font-size:14px;line-height:1.6;max-width:520px}
+.small b{font-weight:600}
+code{font-family:Consolas,monospace}
+a{color:#fff}
+.btn{display:inline-block;margin-top:14px;border:1px solid #fff;padding:8px 16px;text-decoration:none;font-size:14px}
+.btn:hover{background:#fff;color:var(--bsod)}
+</style>
+</head>
+<body>
+<main>
+  <div class="sad">:(</div>
+  <h1>На вашем сайте возникла проблема, и его необходимо перезапустить. Мы лишь собираем некоторые сведения об ошибке, а затем вы будете автоматически перенаправлены на главную.</h1>
+  <div class="pct"><span id="p">0</span>% завершено</div>
+  <div class="foot">
+    <div id="qr"></div>
+    <div class="small">
+      Дополнительные сведения об этой проблеме и возможных методах её решения: <a href="/">ne-for.ru</a><br><br>
+      При обращении в службу поддержки (к админу) сообщите ему эти сведения:<br>
+      Код остановки: <b><code>PAGE_NOT_FOUND</code></b><br>
+      Что пошло не так: <code id="path"></code><br>
+      <a class="btn" href="/">Перезагрузить сейчас</a>
+    </div>
+  </div>
+</main>
+<script src="/assets/qrcode.js"></script>
+<script>
+document.getElementById('path').textContent=location.pathname;
+try{const q=qrcode(0,'L');q.addData('https://ne-for.ru/');q.make();const n=q.getModuleCount(),c=document.createElement('canvas');c.width=c.height=n;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,n,n);x.fillStyle='#0078d7';for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(k,r,1,1);document.getElementById('qr').append(c)}catch(e){document.getElementById('qr').remove()}
+let p=0;const el=document.getElementById('p');
+(function step(){p=Math.min(100,p+Math.floor(Math.random()*9)+(p>80?0:2));el.textContent=p;if(p<100)setTimeout(step,250+Math.random()*700);else setTimeout(()=>location.href='/',1500)})();
+</script>
+</body>
+</html>

@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ne-for.ru — не для всех</title>
+<meta name="description" content="ne-for.ru — терминал, админские тулзы, отмазки и мини-игра. Не для всех.">
+<meta property="og:title" content="ne-for.ru — не для всех">
+<meta property="og:description" content="Терминал, тулзы, отмазки сисадмина и мини-игра.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230b0f0c'/><text x='50%25' y='56%25' text-anchor='middle' dominant-baseline='middle' font-family='monospace' font-size='34' font-weight='700' fill='%2339ff88'>&gt;_</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Unbounded:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090a; --bg2:#0d1210; --card:#101714; --line:#1d2a24;
+  --txt:#d8e6dd; --mut:#7f978a; --acc:#39ff88; --acc2:#00d1ff; --warn:#ffb020; --bad:#ff4d6d;
+  --inset:#050706; --onacc:#001a0b; --navbg:rgba(7,9,10,.75); --bar:#0a0e0c;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --disp:'Unbounded',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font:15px/1.6 var(--mono);overflow-x:hidden}
+a{color:var(--acc);text-decoration:none}
+a:hover{text-decoration:underline}
+::selection{background:var(--acc);color:#000}
+#matrix{position:fixed;inset:0;z-index:0;opacity:.13;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px}
+
+/* nav */
+nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);background:var(--navbg);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:56px;gap:16px}
+.logo{font-weight:800;color:var(--txt)}
+.logo b{color:var(--acc)}
+nav ul{display:flex;gap:18px;list-style:none;font-size:13px}
+nav ul a{color:var(--mut)}
+nav ul a:hover{color:var(--acc);text-decoration:none}
+@media(max-width:640px){nav ul{gap:12px;font-size:12px}nav ul li.hide-sm{display:none}}
+
+/* hero */
+.hero{min-height:80vh;display:flex;flex-direction:column;justify-content:center;padding-block:60px}
+.tag{display:inline-block;border:1px solid var(--line);color:var(--mut);padding:4px 10px;border-radius:99px;font-size:12px;margin-bottom:22px}
+.tag i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-right:8px;box-shadow:0 0 10px var(--acc);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.3}}
+h1{font-family:var(--disp);font-size:clamp(44px,10vw,120px);line-height:.95;letter-spacing:-.03em;position:relative}
+h1 .ne{color:var(--acc)}
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-t);position:absolute;inset:0;opacity:.8}
+.glitch::before{color:var(--acc2);animation:g1 3s infinite steps(1);clip-path:inset(0 0 60% 0)}
+.glitch::after{color:var(--bad);animation:g2 2.4s infinite steps(1);clip-path:inset(55% 0 0 0)}
+@keyframes g1{0%,92%,100%{transform:none}93%{transform:translate(-4px,-2px)}96%{transform:translate(3px,1px)}}
+@keyframes g2{0%,88%,100%{transform:none}89%{transform:translate(4px,2px)}94%{transform:translate(-3px,0)}}
+.sub{font-size:clamp(16px,2.4vw,22px);color:var(--mut);margin-top:22px;max-width:640px}
+.sub b{color:var(--txt)}
+.typed::after{content:'▌';color:var(--acc);animation:pulse 1s infinite}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px}
+.btn{font:inherit;cursor:pointer;border:1px solid var(--acc);background:var(--acc);color:var(--onacc);padding:11px 20px;border-radius:10px;font-weight:600;transition:.15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px -8px var(--acc);text-decoration:none}
+.btn.ghost{background:transparent;color:var(--acc)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:56px;max-width:600px}
+.stat{border:1px solid var(--line);border-radius:12px;padding:14px;background:rgba(16,23,20,.6)}
+.stat b{display:block;font-size:22px;color:var(--acc)}
+.stat span{font-size:12px;color:var(--mut)}
+@media(max-width:640px){.stats{grid-template-columns:repeat(3,1fr);gap:8px}.stat{padding:10px}.stat b{font-size:18px}.stat span{font-size:11px;line-height:1.3;display:block}.navbtn{font-size:11px;padding:3px 6px}}
+
+/* sections */
+section{padding:80px 0;border-top:1px solid var(--line)}
+.h2{font-family:var(--disp);font-size:clamp(26px,4vw,40px);margin-bottom:8px}
+.h2 small{font-family:var(--mono);font-size:14px;color:var(--acc);display:block;margin-bottom:6px;font-weight:400}
+.lead{color:var(--mut);margin-bottom:32px;max-width:680px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+
+/* terminal */
+.term{background:var(--inset);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px -30px rgba(57,255,136,.25)}
+.term-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--bar)}
+.term-bar i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.term-bar span{margin-left:10px;color:var(--mut);font-size:12px}
+#out{height:380px;overflow-y:auto;padding:16px;font-size:14px;white-space:pre-wrap;word-break:break-word}
+#out .p{color:var(--acc)}
+#out .e{color:var(--bad)}
+#out .w{color:var(--warn)}
+#out .c{color:var(--acc2)}
+#out .m{color:var(--mut)}
+.term-in{display:flex;gap:8px;padding:0 16px 16px;align-items:center}
+.term-in label{color:var(--acc);white-space:nowrap}
+#cmd{flex:1;background:transparent;border:0;outline:0;color:var(--txt);font:inherit;caret-color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{font:inherit;font-size:12px;cursor:pointer;background:var(--bg2);color:var(--mut);border:1px solid var(--line);padding:5px 10px;border-radius:8px}
+.chip:hover{color:var(--acc);border-color:var(--acc)}
+
+/* about */
+.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+.skills{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.skill{font-size:12px;padding:5px 10px;border-radius:8px;background:rgba(57,255,136,.08);color:var(--acc);border:1px solid rgba(57,255,136,.25)}
+.timeline{list-style:none;border-left:2px solid var(--line);padding-left:18px}
+.timeline li{position:relative;margin-bottom:18px}
+.timeline li::before{content:'';position:absolute;left:-25px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--acc)}
+.timeline b{display:block}
+.timeline span{color:var(--mut);font-size:13px}
+
+/* tools */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.tab{font:inherit;font-size:13px;cursor:pointer;padding:8px 14px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--mut)}
+.tab.on{background:var(--acc);color:var(--onacc);border-color:var(--acc);font-weight:600}
+.pane{display:none}
+.pane.on{display:block}
+input[type=text],input[type=number],select{font:inherit;background:var(--inset);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;outline:0}
+input:focus,select:focus{border-color:var(--acc)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1;min-width:140px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;margin-top:18px;font-size:14px}
+.kv dt{color:var(--mut)}
+.kv dd{color:var(--txt);word-break:break-all}
+.pw{font-size:clamp(16px,3vw,22px);color:var(--acc);padding:16px;background:var(--inset);border:1px dashed var(--line);border-radius:12px;margin:16px 0;word-break:break-all;cursor:pointer}
+.chk{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin-top:10px}
+.chk label{cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--acc)}
+.excuse{font-size:clamp(18px,3vw,26px);min-height:110px;display:flex;align-items:center;padding:20px;border-radius:14px;background:linear-gradient(135deg,rgba(57,255,136,.08),rgba(0,209,255,.06));border:1px solid var(--line);margin:10px 0 16px}
+.cheat{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.cheat .card{padding:16px}
+.cheat h4{font-size:13px;color:var(--mut);font-weight:400;margin-bottom:8px}
+.cheat code{display:block;color:var(--acc);font-size:13px;cursor:pointer;word-break:break-all}
+.cheat code:hover{color:var(--acc2)}
+#cheatq{margin-bottom:14px}
+
+/* game */
+.game-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.hud{display:flex;gap:20px;font-size:14px}
+.hud b{color:var(--acc)}
+.switch{background:#0b0f0d;border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;grid-template-columns:repeat(8,1fr);gap:10px}
+@media(max-width:560px){.switch{grid-template-columns:repeat(4,1fr)}}
+.port{aspect-ratio:1.2;border-radius:6px;background:#141c18;border:2px solid #22302a;cursor:pointer;position:relative;transition:.1s}
+.port::after{content:'';position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#1f3a2b}
+.port.up::after{background:var(--acc);box-shadow:0 0 8px var(--acc)}
+.port.down{border-color:var(--bad);background:#2a0f16;animation:shake .3s infinite}
+.port.down::after{background:var(--bad);box-shadow:0 0 10px var(--bad)}
+.port.boss{border-color:var(--warn);background:#2a200a}
+.port.boss::after{background:var(--warn);box-shadow:0 0 10px var(--warn)}
+@keyframes shake{50%{transform:translateX(1px)}}
+.gmsg{margin-top:14px;color:var(--mut);min-height:24px}
+
+footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--mut);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--acc);color:var(--onacc);padding:10px 18px;border-radius:10px;font-weight:600;transition:.25s;z-index:50}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.reveal{opacity:0;transform:translateY(20px);transition:.6s}
+.reveal.in{opacity:1;transform:none}
+/* v2 */
+textarea{font:inherit;background:var(--inset);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;outline:0;resize:vertical}
+textarea:focus{border-color:var(--acc)}
+.dnsres{margin-top:16px;display:grid;gap:8px}
+.dnsrow{display:grid;grid-template-columns:70px 1fr 80px;gap:12px;padding:10px 12px;background:var(--inset);border:1px solid var(--line);border-radius:10px;font-size:14px;word-break:break-all}
+.dnsrow .t{color:var(--acc)} .dnsrow .ttl{color:var(--mut);text-align:right}
+.conv{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.conv .wide{grid-column:1/-1}
+.conv h4{color:var(--mut);font-weight:400;font-size:13px;margin-bottom:10px}
+@media(max-width:720px){.conv{grid-template-columns:1fr}}
+.chmod{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px 10px;font-size:13px;align-items:center}
+.chmod b{color:var(--mut);font-weight:400}
+.chmod label{cursor:pointer;display:flex;gap:6px;align-items:center}
+input[type=checkbox]{accent-color:var(--acc)}
+.pre{margin-top:12px;padding:12px;background:var(--inset);border:1px dashed var(--line);border-radius:10px;min-height:48px;white-space:pre-wrap;word-break:break-all;color:var(--acc);cursor:pointer;font:inherit;font-size:13px}
+.qrbox{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+#qr{background:#fff;padding:14px;border-radius:14px;line-height:0}
+#qr img,#qr canvas{width:220px;height:220px;image-rendering:pixelated}
+#qrlbl{color:var(--mut);font-size:13px}
+.apane{display:none}.apane.on{display:block}
+#snake{width:100%;max-width:480px;aspect-ratio:3/2;height:auto;display:block;margin:0 auto;background:var(--inset);border:1px solid var(--line);border-radius:12px;touch-action:none}
+.dpad{display:none;grid-template-columns:repeat(4,56px);gap:8px;justify-content:center;margin-top:12px}
+.dpad button{font:inherit;font-size:20px;height:48px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--acc)}
+@media(pointer:coarse){.dpad{display:grid}}
+.mine{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;max-width:520px;margin:0 auto;user-select:none}
+.mine div{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:4px;background:#1a241f;border:1px solid #26352d;cursor:pointer;font-size:clamp(11px,2.4vw,15px);font-weight:800}
+.mine div:hover{border-color:var(--acc)}
+.mine div.o{background:#07100b;border-color:#0f1a14;cursor:default}
+.mine div.x{background:#3a0f18}
+.phone{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.caller{color:var(--mut);font-size:13px}
+.caller b{color:var(--txt)}
+.bubble{background:var(--inset);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:16px 18px;font-size:16px;max-width:680px}
+.answers{display:grid;gap:8px;max-width:680px}
+.answers button{font:inherit;text-align:left;cursor:pointer;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--txt)}
+.answers button:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
+.answers button:disabled{opacity:.5;cursor:default}
+.answers button.good{border-color:var(--acc);color:var(--acc);opacity:1}
+.answers button.bad{border-color:var(--bad);color:var(--bad);opacity:1}
+.stgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.svc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;position:relative}
+.svc-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.svc-h b{font-size:14px}
+.badge{font-size:11px;padding:3px 8px;border-radius:99px;border:1px solid;white-space:nowrap}
+.badge.ok{color:var(--acc);border-color:rgba(57,255,136,.4)}
+.badge.slow{color:var(--warn);border-color:rgba(255,176,32,.4)}
+.badge.down{color:var(--bad);border-color:rgba(255,77,109,.4)}
+.badge.wait{color:var(--mut);border-color:var(--line)}
+.svc-ms{font-size:24px;font-weight:800;margin:6px 0 2px}
+.svc-ms small{font-size:12px;color:var(--mut);font-weight:400}
+.svc-sub{font-size:12px;color:var(--mut)}
+.spark{width:100%;height:44px;display:block;margin-top:8px;overflow:visible}
+.tip{position:fixed;pointer-events:none;background:#000;border:1px solid var(--line);color:var(--txt);font-size:12px;padding:4px 8px;border-radius:6px;z-index:60;display:none}
+.posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.post{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;cursor:pointer;transition:.15s;text-align:left;font:inherit;color:inherit}
+.post:hover{border-color:var(--acc);transform:translateY(-2px)}
+.post .d{font-size:12px;color:var(--mut)}
+.post h3{font-family:var(--disp);font-size:17px;margin:6px 0 8px;line-height:1.3}
+.post p{font-size:13px;color:var(--mut)}
+.post .tg{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.post .tg span{font-size:11px;color:var(--acc2)}
+.reader{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);overflow-y:auto;padding:40px 16px}
+.reader-in{max-width:780px;margin:0 auto;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:32px clamp(18px,4vw,40px);position:relative}
+.rclose{position:absolute;top:14px;right:14px;font:inherit;background:none;border:1px solid var(--line);color:var(--mut);border-radius:8px;width:36px;height:36px;cursor:pointer}
+.rclose:hover{color:var(--acc);border-color:var(--acc)}
+.md h1{font-family:var(--disp);font-size:clamp(24px,4vw,34px);line-height:1.2;margin-bottom:14px}
+.md h2{font-family:var(--disp);font-size:20px;margin:28px 0 10px}
+.md h3{font-size:16px;margin:20px 0 8px;color:var(--acc)}
+.md p,.md ul,.md ol{margin:10px 0}
+.md ul,.md ol{padding-left:22px}
+.md code{background:var(--inset);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-size:13px;color:var(--acc)}
+.md pre{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;margin:12px 0;position:relative}
+.md pre code{border:0;padding:0;background:none;color:var(--txt)}
+.md blockquote{border-left:3px solid var(--warn);padding:4px 14px;color:var(--mut);margin:12px 0}
+.md table{border-collapse:collapse;width:100%;font-size:13px;margin:12px 0}
+.md th,.md td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.md .meta{color:var(--mut);font-size:13px;margin-bottom:20px}
+.cpy{position:absolute;top:8px;right:8px;font:inherit;font-size:11px;background:var(--bg2);border:1px solid var(--line);color:var(--mut);border-radius:6px;padding:2px 8px;cursor:pointer}
+.cpy:hover{color:var(--acc)}
+body.root{--acc:#ff3b5c;--acc2:#ffb020}
+body.root #matrix{filter:hue-rotate(210deg)}
+[hidden]{display:none!important}
+/* v3: темы */
+body.t-amber{--acc:#ffb000;--acc2:#ff6a00;--onacc:#1a0f00}
+body.t-ice{--acc:#5ad7ff;--acc2:#b18cff;--onacc:#001722}
+body.t-light{--bg:#eef2ef;--bg2:#e3e9e5;--card:#ffffff;--line:#cfdad3;--txt:#14211a;--mut:#58695f;--acc:#0a7f43;--acc2:#0a6a96;--warn:#a86200;--bad:#c21f43;--inset:#f6f9f7;--onacc:#ffffff;--navbg:rgba(238,242,239,.85);--bar:#e3e9e5;color-scheme:light}
+body.t-light #matrix{display:none}
+body.t-light .glitch::before,body.t-light .glitch::after{opacity:.35}
+body.t-light .stat,body.t-light .term{box-shadow:none}
+nav .wrap{gap:12px}
+.navctl{display:flex;gap:6px;flex:0 0 auto}
+.navbtn{font:inherit;font-size:12px;cursor:pointer;background:transparent;border:1px solid var(--line);color:var(--mut);padding:4px 9px;border-radius:8px;white-space:nowrap}
+.navbtn:hover,.navbtn[aria-pressed=true]{color:var(--acc);border-color:var(--acc)}
+nav ul{overflow-x:auto;scrollbar-width:none;min-width:0}
+nav ul::-webkit-scrollbar{display:none}
+nav ul li{white-space:nowrap}
+@media(max-width:820px){nav .logo{display:none}}
+/* v3: конфигуратор */
+.mtgen{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:start}
+@media(max-width:900px){.mtgen{grid-template-columns:minmax(0,1fr)}}
+.mtform{display:grid;gap:18px}
+.mtform fieldset{border:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.mtform legend{color:var(--acc);font-size:13px;margin-bottom:10px;padding:0}
+.fld{display:grid;gap:4px;font-size:12px;color:var(--mut);min-width:0}
+.fld.w2,.tgl.w2,.mtform .sub2{grid-column:1/-1}
+.tgl{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--txt);cursor:pointer;grid-column:1/-1}
+.sub2{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+@media(max-width:480px){.mtform fieldset,.sub2{grid-template-columns:1fr}}
+.mtout{position:sticky;top:72px;min-width:0}
+pre.code{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;max-height:640px;font-size:12.5px;line-height:1.55;white-space:pre;color:var(--txt)}
+pre.code .cm{color:var(--mut)} pre.code .pa{color:var(--acc2)} pre.code .kw{color:var(--acc)}
+.warnbox{font-size:13px;color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);border-radius:10px;padding:8px 12px;margin-bottom:10px}
+/* v3: серверная */
+.rackwrap{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start}
+@media(max-width:760px){.rackwrap{grid-template-columns:minmax(0,1fr)}}
+.rackcol{display:grid;gap:10px;justify-items:center}
+#rackcv{width:300px;max-width:100%;height:auto;image-rendering:pixelated;cursor:pointer;border-radius:10px;background:#0b0d0c;border:1px solid var(--line)}
+.rackenv{display:flex;gap:14px;font-size:12px;color:var(--mut);flex-wrap:wrap;justify-content:center}
+.rackenv b{color:var(--acc);font-variant-numeric:tabular-nums}
+.rackinfo{min-height:360px;display:grid;gap:12px;align-content:start}
+.rackinfo h3{font-family:var(--disp);font-size:20px}
+.rackinfo .role{color:var(--mut);font-size:13px}
+.meter{height:8px;border-radius:99px;background:var(--inset);border:1px solid var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--acc);transition:width .6s}
+.rlog{background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;height:190px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;white-space:pre-wrap;word-break:break-word}
+.rlog .t{color:var(--mut)} .rlog .w{color:var(--warn)} .rlog .e{color:var(--bad)}
+.h3{font-family:var(--disp);font-size:22px;margin:56px 0 6px}
+#uncv{width:100%;height:auto;aspect-ratio:15/8;max-width:100%;display:block;background:var(--inset);border:1px solid var(--line);border-radius:14px;touch-action:none;cursor:grab}
+/* v3: тулзы */
+.rx mark{background:color-mix(in srgb,var(--acc) 30%,transparent);color:inherit;border-radius:3px;outline:1px solid var(--acc)}
+.rxout{margin-top:12px;padding:12px;background:var(--inset);border:1px solid var(--line);border-radius:10px;white-space:pre-wrap;word-break:break-word;font-size:13px;min-height:60px}
+.diffout{margin-top:12px;background:var(--inset);border:1px solid var(--line);border-radius:10px;font-size:13px;overflow:auto;max-height:420px}
+.diffout div{padding:1px 12px;white-space:pre}
+.diffout .a{background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
+.diffout .d{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.diffout .s{color:var(--mut)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.two{grid-template-columns:1fr}}
+.hashes{display:grid;gap:8px;margin-top:12px}
+.hashes div{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px;padding:8px 12px;background:var(--inset);border:1px solid var(--line);border-radius:10px;font-size:13px;cursor:pointer}
+.hashes b{color:var(--mut);font-weight:400}
+.hashes span{word-break:break-all;color:var(--acc)}
+.cronnext{margin-top:12px;display:grid;gap:4px;font-size:13px;font-variant-numeric:tabular-nums}
+.crontxt{font-size:clamp(16px,2.6vw,20px);margin-top:14px;color:var(--txt)}
+/* v3: хакер */
+.hack{position:fixed;inset:0;z-index:80;background:#000;color:#39ff88;padding:24px 16px;overflow:hidden;font:14px/1.5 var(--mono);cursor:text}
+.hack pre{white-space:pre-wrap;word-break:break-all;height:calc(100% - 30px);overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+.hackhint{position:absolute;right:16px;top:10px;color:#3a6;font-size:12px}
+.granted{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:800 clamp(30px,8vw,90px) var(--disp);color:#39ff88;text-shadow:0 0 30px #39ff88;background:rgba(0,0,0,.6);animation:pulse .5s 4}
+.granted.den{color:#ff4d6d;text-shadow:0 0 30px #ff4d6d}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<nav><div class="wrap">
+  <a class="logo" href="#top">&gt;_ <b>ne</b>-for.ru</a>
+  <ul>
+    <li><a href="#term">терминал</a></li>
+    <li><a href="#tools">тулзы</a></li>
+    <li><a href="#mtconf">конфиг</a></li>
+    <li><a href="#rack">серверная</a></li>
+    <li><a href="#game">игры</a></li>
+    <li><a href="#status">статус</a></li>
+    <li><a href="#blog">блог</a></li>
+  </ul>
+  <div class="navctl"><button class="navbtn" id="themeBtn" title="Сменить тему">тема</button><button class="navbtn" id="soundBtn" aria-pressed="false">звук: выкл</button></div>
+</div></nav>
+
+<header class="hero wrap" id="top">
+  <div><span class="tag"><i></i>uptime: <span id="uptime">0с</span> · всё работает (пока)</span></div>
+  <h1><span class="glitch" data-t="ne-for"><span class="ne">ne</span>-for</span><br>.ru</h1>
+  <p class="sub">Сайт <b>не для всех</b>. <span class="typed" id="typed"></span></p>
+  <div class="cta">
+    <a class="btn" href="#term">Открыть терминал</a>
+    <a class="btn ghost" href="#game">Спасти сеть</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="cof">3</b><span>кофе сегодня</span></div>
+    <div class="stat"><b>99.9%</b><span>аптайм (в отчётах)</span></div>
+    <div class="stat"><b>0</b><span>тикетов «срочно» (ложь)</span></div>
+  </div>
+</header>
+
+<section id="term"><div class="wrap reveal">
+  <div class="h2"><small>// 01</small>Терминал</div>
+  <p class="lead">Настоящий™ шелл. Введи <b>help</b> или тыкни команду ниже.</p>
+  <div class="term">
+    <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span>guest@ne-for: ~</span></div>
+    <div id="out"></div>
+    <form class="term-in" id="tform" autocomplete="off"><label>guest@ne-for:~$</label><input id="cmd" spellcheck="false" aria-label="команда"></form>
+  </div>
+  <div class="chips" id="chips"></div>
+</div></section>
+
+
+<section id="tools"><div class="wrap reveal">
+  <div class="h2"><small>// 02</small>Тулзы</div>
+  <p class="lead">Полезное. Всё считается в браузере, никуда ничего не улетает.</p>
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-p="subnet">Калькулятор подсетей</button>
+    <button class="tab" data-p="pass">Генератор паролей</button>
+    <button class="tab" data-p="exc">Отмазки админа</button>
+    <button class="tab" data-p="mt">Шпаргалка MikroTik</button>
+    <button class="tab" data-p="ip">Мой IP</button>
+    <button class="tab" data-p="dns">DNS lookup</button>
+    <button class="tab" data-p="conv">Конвертеры</button>
+    <button class="tab" data-p="wifi">Wi-Fi QR</button>
+    <button class="tab" data-p="cron">Cron</button>
+    <button class="tab" data-p="rx">Regex</button>
+    <button class="tab" data-p="diff">Diff</button>
+    <button class="tab" data-p="json">JSON / YAML</button>
+    <button class="tab" data-p="hash">Хэши / UUID</button>
+  </div>
+
+  <div class="pane card on" id="p-subnet">
+    <div class="row">
+      <input type="text" id="cidr" value="192.168.88.1/24" placeholder="10.0.0.1/22">
+      <select id="mask"></select>
+    </div>
+    <dl class="kv" id="sres"></dl>
+  </div>
+
+  <div class="pane card" id="p-pass">
+    <div class="row" style="align-items:center"><span style="flex:0 0 auto;color:var(--mut)">Длина: <b id="plen" style="color:var(--acc)">20</b></span><input type="range" id="prange" min="8" max="64" value="20"></div>
+    <div class="chk">
+      <label><input type="checkbox" id="pU" checked> A-Z</label>
+      <label><input type="checkbox" id="pL" checked> a-z</label>
+      <label><input type="checkbox" id="pD" checked> 0-9</label>
+      <label><input type="checkbox" id="pS" checked> !@#$</label>
+      <label><input type="checkbox" id="pA" checked> без похожих (0O l1I)</label>
+    </div>
+    <div class="pw" id="pw" title="Клик — скопировать"></div>
+    <div class="row"><button class="btn" id="pgen" style="flex:0 0 auto">Сгенерировать</button><span id="pent" style="color:var(--mut);font-size:13px"></span></div>
+  </div>
+
+  <div class="pane card" id="p-exc">
+    <div class="excuse" id="excuse">Нажми кнопку — получи железобетонную отмазку.</div>
+    <div class="row"><button class="btn" id="egen" style="flex:0 0 auto">Сгенерировать отмазку</button><button class="btn ghost" id="ecopy" style="flex:0 0 auto">Скопировать</button></div>
+  </div>
+
+  <div class="pane card" id="p-mt">
+    <input type="text" id="cheatq" placeholder="поиск: dhcp, vpn, backup, firewall...">
+    <div class="cheat" id="cheat"></div>
+  </div>
+
+  <div class="pane card" id="p-ip">
+    <div class="row"><button class="btn" id="ipgo" style="flex:0 0 auto">Определить</button><span style="color:var(--mut);font-size:13px">Внешний IP берётся у ipify.org, остальное — из твоего браузера.</span></div>
+    <dl class="kv" id="ipres"></dl>
+  </div>
+
+  <div class="pane card" id="p-dns">
+    <div class="row">
+      <input type="text" id="dnsname" value="ne-for.ru" placeholder="example.ru">
+      <select id="dnstype"><option>A</option><option>AAAA</option><option>CNAME</option><option>MX</option><option>TXT</option><option>NS</option><option>SOA</option><option>CAA</option></select>
+      <button class="btn" id="dnsgo" style="flex:0 0 auto">Резолвить</button>
+    </div>
+    <p style="color:var(--mut);font-size:13px;margin-top:10px">Через DNS-over-HTTPS (Cloudflare 1.1.1.1, запасной — Google 8.8.8.8).</p>
+    <div id="dnsres" class="dnsres"></div>
+  </div>
+
+  <div class="pane card" id="p-conv">
+    <div class="conv">
+      <div>
+        <h4>chmod</h4>
+        <div class="chmod" id="chmod"></div>
+        <div class="row" style="margin-top:10px"><input type="text" id="chmodn" value="755" maxlength="4"><input type="text" id="chmods" readonly></div>
+      </div>
+      <div>
+        <h4>Unix time</h4>
+        <div class="row"><input type="text" id="unix" placeholder="1700000000"><button class="btn ghost" id="unixnow" style="flex:0 0 auto">Сейчас</button></div>
+        <dl class="kv" id="unixres" style="margin-top:10px"></dl>
+      </div>
+      <div class="wide">
+        <h4>Base64 / URL / HEX</h4>
+        <textarea id="b64in" rows="3" placeholder="вставь текст или base64"></textarea>
+        <div class="chips">
+          <button class="chip" data-c="b64e">→ Base64</button><button class="chip" data-c="b64d">Base64 →</button>
+          <button class="chip" data-c="urle">→ URL</button><button class="chip" data-c="urld">URL →</button>
+          <button class="chip" data-c="hexe">→ HEX</button><button class="chip" data-c="jwt">Разобрать JWT</button>
+        </div>
+        <pre id="b64out" class="pre" title="клик — скопировать"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="pane card" id="p-cron">
+    <div class="row"><input type="text" id="cronin" value="*/15 9-18 * * 1-5" aria-label="cron-выражение"></div>
+    <div class="chips" id="cronchips"></div>
+    <div class="crontxt" id="crontxt"></div>
+    <div class="cronnext" id="cronnext"></div>
+  </div>
+
+  <div class="pane card" id="p-rx">
+    <div class="row"><input type="text" id="rxpat" value="(\d{1,3}\.){3}\d{1,3}" aria-label="регулярка"><input type="text" id="rxflags" value="g" style="flex:0 0 90px;min-width:0" aria-label="флаги"></div>
+    <textarea id="rxtext" rows="5" style="margin-top:10px" aria-label="текст">Sep 29 10:14:02 gw firewall: drop 185.220.101.7 -> 192.168.10.1:22
+Sep 29 10:14:05 gw dhcp: lease 192.168.10.54 to 3C:52:82:AA:10:FE
+Sep 29 10:15:11 gw ppp: sstp-hub connected from 95.163.244.138</textarea>
+    <div class="rxout rx" id="rxout"></div>
+    <div id="rxinfo" style="color:var(--mut);font-size:13px;margin-top:8px"></div>
+  </div>
+
+  <div class="pane card" id="p-diff">
+    <div class="two">
+      <textarea id="dfa" rows="8" aria-label="было">/ip dns set servers=8.8.8.8
+/ip service disable telnet,ftp
+/system identity set name=gw-old
+/ip firewall nat add chain=srcnat action=masquerade</textarea>
+      <textarea id="dfb" rows="8" aria-label="стало">/ip dns set servers=77.88.8.8,1.1.1.1
+/ip service disable telnet,ftp,www,api
+/system identity set name=gw-office
+/ip firewall nat add chain=srcnat action=masquerade</textarea>
+    </div>
+    <div class="chk"><label><input type="checkbox" id="dfws"> игнорировать пробелы</label></div>
+    <div class="diffout" id="dfout"></div>
+  </div>
+
+  <div class="pane card" id="p-json">
+    <textarea id="jin" rows="8" aria-label="JSON или YAML">{"router":"office-gw","wan":{"type":"pppoe","port":"ether1"},"lan":["ether2","ether3","ether4"],"wifi":true}</textarea>
+    <div class="chips">
+      <button class="chip" data-j="fmt">Форматировать JSON</button><button class="chip" data-j="min">Минифицировать</button>
+      <button class="chip" data-j="toyaml">JSON → YAML</button><button class="chip" data-j="tojson">YAML → JSON</button>
+    </div>
+    <pre class="pre" id="jout" title="клик — скопировать"></pre>
+  </div>
+
+  <div class="pane card" id="p-hash">
+    <textarea id="hin" rows="3" aria-label="текст для хэша">ne-for.ru</textarea>
+    <div class="row" style="margin-top:10px"><label class="chip" style="flex:0 0 auto">Хэш файла…<input type="file" id="hfile" hidden></label><span id="hfname" style="color:var(--mut);font-size:13px"></span></div>
+    <div class="hashes" id="hout"></div>
+    <div class="row" style="margin-top:18px"><button class="btn ghost" id="uuidgo" style="flex:0 0 auto">Сгенерировать UUID</button></div>
+    <div class="hashes" id="uuidout"></div>
+  </div>
+
+  <div class="pane card" id="p-wifi">
+    <div class="grid2">
+      <div>
+        <input type="text" id="wssid" placeholder="SSID (имя сети)" value="ne-for-guest">
+        <div class="row" style="margin-top:10px"><input type="text" id="wpass" placeholder="пароль"><select id="wsec"><option value="WPA">WPA/WPA2/WPA3</option><option value="WEP">WEP (2003 звонил)</option><option value="nopass">Открытая</option></select></div>
+        <div class="chk"><label><input type="checkbox" id="whid"> скрытая сеть</label></div>
+        <p style="color:var(--mut);font-size:13px;margin-top:14px">Наведи камеру телефона — подключится без ввода пароля. Распечатай и повесь в переговорке.</p>
+        <div class="row" style="margin-top:14px"><button class="btn" id="wdl" style="flex:0 0 auto">Скачать PNG</button></div>
+      </div>
+      <div class="qrbox"><div id="qr"></div><div id="qrlbl"></div></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="mtconf"><div class="wrap reveal">
+  <div class="h2"><small>// 03</small>Конфигуратор MikroTik</div>
+  <p class="lead">Заполни форму и получи скрипт для RouterOS 7. Он рассчитан на чистый роутер после <code>/system reset-configuration no-defaults=yes</code>. Перед применением прочитай, что вставляешь.</p>
+  <div class="mtgen">
+    <form class="card mtform" id="mtform" autocomplete="off">
+      <fieldset><legend>Основное</legend>
+        <label class="fld">Имя роутера<input type="text" id="mt-id" value="office-gw"></label>
+        <label class="fld">Часовой пояс<select id="mt-tz"><option>Europe/Moscow</option><option>Europe/Kaliningrad</option><option>Europe/Samara</option><option>Asia/Yekaterinburg</option><option>Asia/Omsk</option><option>Asia/Novosibirsk</option><option>Asia/Krasnoyarsk</option><option>Asia/Irkutsk</option><option>Asia/Vladivostok</option></select></label>
+        <label class="fld">Новый админ (логин)<input type="text" id="mt-user" placeholder="пусто — не создавать"></label>
+        <label class="fld">Его пароль<input type="text" id="mt-upass"></label>
+      </fieldset>
+      <fieldset><legend>WAN</legend>
+        <label class="fld">Порт<input type="text" id="mt-wan" value="ether1"></label>
+        <label class="fld">Тип подключения<select id="mt-wantype"><option value="dhcp">DHCP</option><option value="static">Статический IP</option><option value="pppoe">PPPoE</option></select></label>
+        <div class="sub2" id="mt-static" hidden><label class="fld">IP/маска<input type="text" id="mt-wanip" value="203.0.113.10/29"></label><label class="fld">Шлюз<input type="text" id="mt-wangw" value="203.0.113.9"></label></div>
+        <div class="sub2" id="mt-pppoe" hidden><label class="fld">Логин PPPoE<input type="text" id="mt-pu"></label><label class="fld">Пароль PPPoE<input type="text" id="mt-pp"></label></div>
+      </fieldset>
+      <fieldset><legend>LAN</legend>
+        <label class="fld">Порты LAN<input type="text" id="mt-lanports" value="ether2-ether5"></label>
+        <label class="fld">Адрес роутера в LAN<input type="text" id="mt-lanip" value="192.168.10.1/24"></label>
+        <label class="fld w2">DNS-серверы провайдеров<input type="text" id="mt-dns" value="77.88.8.8,1.1.1.1"></label>
+      </fieldset>
+      <fieldset><legend>Wi-Fi</legend>
+        <label class="tgl"><input type="checkbox" id="mt-wifi" checked> Включить Wi-Fi</label>
+        <label class="fld w2">Драйвер<select id="mt-wdrv"><option value="wifi">wifi (RouterOS 7.13+, ax-модели)</option><option value="wireless">wireless (hAP ac², hAP lite и старше)</option></select></label>
+        <label class="fld">SSID<input type="text" id="mt-ssid" value="Office"></label>
+        <label class="fld">Пароль (от 8 символов)<input type="text" id="mt-wpass"></label>
+        <label class="tgl"><input type="checkbox" id="mt-guest"> Гостевая сеть, изолированная от LAN</label>
+        <div class="sub2" id="mt-gbox" hidden><label class="fld">Гостевой SSID<input type="text" id="mt-gssid" value="Office-Guest"></label><label class="fld">Пароль гостей<input type="text" id="mt-gpass"></label><label class="fld">Подсеть гостей<input type="text" id="mt-gnet" value="192.168.99.1/24"></label></div>
+      </fieldset>
+      <fieldset><legend>Резерв и безопасность</legend>
+        <label class="tgl"><input type="checkbox" id="mt-lte"> Резервный канал LTE (lte1) с проверкой через маяк</label>
+        <label class="fld w2" id="mt-bbox" hidden>Маяк (не должен совпадать с DNS)<input type="text" id="mt-beacon" value="8.8.4.4"></label>
+        <label class="tgl"><input type="checkbox" id="mt-fw" checked> Базовый firewall</label>
+        <label class="tgl"><input type="checkbox" id="mt-harden" checked> Отключить лишние сервисы, Winbox и MAC-доступ только из LAN</label>
+      </fieldset>
+    </form>
+    <div class="mtout card">
+      <div class="game-top" style="margin-bottom:10px"><b>office-gw.rsc</b><div class="row" style="flex:0 0 auto"><button class="btn ghost" id="mt-copy" style="flex:0 0 auto">Скопировать</button><button class="btn" id="mt-dl" style="flex:0 0 auto">Скачать .rsc</button></div></div>
+      <div id="mt-warn"></div>
+      <pre class="code" id="mt-code"></pre>
+    </div>
+  </div>
+</div></section>
+
+<section id="rack"><div class="wrap reveal">
+  <div class="h2"><small>// 04</small>Серверная</div>
+  <p class="lead">Стойка на 12 юнитов. Кликни по железке: покажет нагрузку и живые логи, её можно перезагрузить. Ниже мини-игра про кабели.</p>
+  <div class="rackwrap">
+    <div class="rackcol"><canvas id="rackcv" width="100" height="148" aria-label="Стойка с оборудованием"></canvas><div class="rackenv" id="rackenv"></div><button class="navbtn" id="humBtn" aria-pressed="false">гул серверной: выкл</button></div>
+    <div class="card rackinfo" id="rackinfo"></div>
+  </div>
+  <div class="h3">Кабель-менеджмент</div>
+  <p class="lead">Растаскивай коннекторы так, чтобы кабели нигде не пересекались. Пересекающиеся подсвечены красным.</p>
+  <div class="game-top"><div class="hud"><span>Уровень: <b id="unl">1</b></span><span>Пересечений: <b id="unx">0</b></span><span>Ходов: <b id="unm">0</b></span></div><div class="row" style="flex:0 0 auto"><button class="btn ghost" id="unreset" style="flex:0 0 auto">Перемешать</button><button class="btn" id="unnext" style="flex:0 0 auto" hidden>Следующий уровень</button></div></div>
+  <canvas id="uncv" width="900" height="480" aria-label="Игра: распутай кабели"></canvas>
+</div></section>
+
+<section id="game"><div class="wrap reveal">
+  <div class="h2"><small>// 05</small>Кто положил сеть?</div>
+  <p class="lead">Порты на коммутаторе падают. Кликай по <span style="color:var(--bad)">красным</span>, чтобы поднять. <span style="color:var(--warn)">Жёлтый</span> — бухгалтерия, даёт +5, но надо кликнуть трижды. Упадёт больше половины — ты уволен.</p>
+  <div class="game-top">
+    <div class="hud"><span>Очки: <b id="gs">0</b></span><span>Время: <b id="gt">45</b>с</span><span>Рекорд: <b id="gb">0</b></span></div>
+    <button class="btn" id="gstart">Старт смены</button>
+  </div>
+  <div class="switch" id="sw"></div>
+  <div class="gmsg" id="gmsg">Смена ещё не началась. Кофе налит.</div>
+</div></section>
+
+
+<section id="arcade"><div class="wrap reveal">
+  <div class="h2"><small>// 06</small>Аркада</div>
+  <p class="lead">Когда тикеты закрыты (никогда).</p>
+  <div class="tabs" id="atabs">
+    <button class="tab on" data-a="snake">Змейка по кабель-каналу</button>
+    <button class="tab" data-a="mine">Сапёр в серверной</button>
+    <button class="tab" data-a="call">Звонок на линию</button>
+  </div>
+
+  <div class="apane card on" id="a-snake">
+    <div class="game-top"><div class="hud"><span>Пакеты: <b id="ss">0</b></span><span>Рекорд: <b id="sb">0</b></span></div><button class="btn" id="sstart">Старт</button></div>
+    <canvas id="snake" width="480" height="320"></canvas>
+    <div class="dpad"><button data-d="up">↑</button><button data-d="left">←</button><button data-d="down">↓</button><button data-d="right">→</button></div>
+    <p class="gmsg">Стрелки/WASD или свайпы. Собирай пакеты, не врезайся в стойку. Пробел — пауза.</p>
+  </div>
+
+  <div class="apane card" id="a-mine">
+    <div class="game-top"><div class="hud"><span>Мин: <b id="mleft">15</b></span><span>Время: <b id="mt">0</b>с</span></div>
+      <div class="row" style="flex:0 0 auto"><button class="btn ghost" id="mflag" style="flex:0 0 auto">Режим: копать</button><button class="btn" id="mnew" style="flex:0 0 auto">Новая</button></div></div>
+    <div class="mine" id="mine"></div>
+    <p class="gmsg" id="mmsg">Где-то в серверной 15 сгоревших блоков питания. ПКМ или «режим флажка» — пометить.</p>
+  </div>
+
+  <div class="apane card" id="a-call">
+    <div class="game-top"><div class="hud"><span>Карма: <b id="ck">50</b></span><span>Звонок: <b id="cn">1</b>/8</span></div><button class="btn" id="cnew" style="flex:0 0 auto">Сначала</button></div>
+    <div class="phone"><div class="caller" id="cwho"></div><div class="bubble" id="cq"></div></div>
+    <div class="answers" id="cans"></div>
+    <p class="gmsg" id="cmsg"></p>
+  </div>
+</div></section>
+
+<section id="status"><div class="wrap reveal">
+  <div class="h2"><small>// 07</small>Всё ли упало?</div>
+  <p class="lead">Живая проверка из <b>твоего</b> браузера: время ответа до сервисов, раз в 15 секунд. Если «лежит» — может, это у тебя, а может, у всех.</p>
+  <div class="game-top"><div class="hud"><span>Проверок: <b id="stc">0</b></span><span>Живо: <b id="stup">—</b></span></div><button class="btn ghost" id="stgo" style="flex:0 0 auto">Проверить сейчас</button></div>
+  <div class="stgrid" id="stgrid"></div>
+  <p class="gmsg" style="font-size:12px">Замер = время загрузки favicon через fetch (no-cors). Это не ICMP, а честный «доходит ли браузер» с учётом DNS и TLS.</p>
+</div></section>
+
+<section id="blog"><div class="wrap reveal">
+  <div class="h2"><small>// 08</small>Заметки</div>
+  <p class="lead">Коротко и по делу — то, что потом гуглишь сам у себя.</p>
+  <div class="tabs" id="btags"></div>
+  <div class="posts" id="posts"><p style="color:var(--mut)">Загружаю...</p></div>
+</div></section>
+
+<div class="reader" id="reader" hidden><div class="reader-in"><button class="rclose" id="rclose" aria-label="закрыть">✕</button><article class="md" id="rbody"></article></div></div>
+
+<footer><div class="wrap">
+  <span>© <span id="yr"></span> ne-for.ru — не для всех, но для тебя можно</span>
+  <span>сделано руками и чуть-чуть скриптом · <a href="#top">наверх ↑</a></span>
+</div></footer>
+<div class="hack" id="hack" hidden><div class="hackhint">жми любые клавиши · Esc — выход</div><pre id="hackpre"></pre><div class="granted" id="granted" hidden>ACCESS GRANTED</div></div>
+<div class="toast" id="toast">Скопировано</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const toast=(t='Скопировано')=>{const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1400)};
+const copy=t=>{navigator.clipboard?.writeText(t).then(()=>toast()).catch(()=>toast('Не вышло скопировать'))};
+$('#yr').textContent=new Date().getFullYear();
+
+/* matrix bg */
+(()=>{const c=$('#matrix'),x=c.getContext('2d');let w,h,cols,d;const ch='01ｱｲｳｴｵｶｷｸｹｺ<>/{}#$%ネフォ';
+const rs=()=>{w=c.width=innerWidth;h=c.height=innerHeight;cols=Math.floor(w/16);d=Array(cols).fill(0).map(()=>Math.random()*-50)};rs();addEventListener('resize',rs);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function f(){x.fillStyle='rgba(7,9,10,.12)';x.fillRect(0,0,w,h);x.fillStyle=getComputedStyle(document.body).getPropertyValue('--acc').trim()||'#39ff88';x.font='14px monospace';
+d.forEach((y,i)=>{x.fillText(rnd(ch),i*16,y*16);d[i]=y*16>h&&Math.random()>.975?0:y+1});if(!reduce)setTimeout(()=>requestAnimationFrame(f),50)}f()})();
+
+/* uptime + typed */
+const t0=Date.now();setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);$('#uptime').textContent=s<60?s+'с':Math.floor(s/60)+'м '+s%60+'с'},1000);
+$('#cof').textContent=2+new Date().getHours()%5;
+(()=>{const ph=['Терминал, тулзы и немного боли.','Работает — не трогай.','Это не баг, это фича.','Перезагрузить пробовали?','DNS. Всегда виноват DNS.'];let i=0,j=0,del=false;const el=$('#typed');
+(function tick(){const p=ph[i];el.textContent=p.slice(0,j);if(!del&&j<p.length)j++;else if(!del){del=true;return setTimeout(tick,1800)}else if(j>0)j--;else{del=false;i=(i+1)%ph.length}setTimeout(tick,del?30:60)})()})();
+
+/* reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add('in')),{threshold:.12});$$('.reveal').forEach(e=>io.observe(e));
+
+/* ---------- excuses ---------- */
+const EX={a:['Это','Похоже, это','Судя по логам, это','Сто процентов, это','Мы выяснили: это'],
+b:['магнитная буря','обновление Windows','вмешательство бухгалтерии','солнечная активность','кривой патч-корд','DNS','петля в сети','китайский блок питания','Роскомнадзор','уборщица и розетка','кэш браузера','сертификат, который истёк вчера','конфликт IP-адресов','кот в серверной','Честный ЗНАК','вендор','новый сотрудник с флешкой'],
+c:['— уже чиним.','— надо перезагрузиться.','— это не у нас, это у провайдера.','— завтра само пройдёт.','— создайте заявку в GLPI.','— работает как задумано.','— у меня всё работает.','— подождите 15 минут, DNS обновится.']};
+const excuse=()=>`${rnd(EX.a)} ${rnd(EX.b)} ${rnd(EX.c)}`;
+$('#egen').onclick=()=>$('#excuse').textContent=excuse();
+$('#ecopy').onclick=()=>copy($('#excuse').textContent);
+
+/* ---------- subnet ---------- */
+const ip2n=s=>{const p=s.split('.').map(Number);if(p.length!==4||p.some(x=>isNaN(x)||x<0||x>255||!Number.isInteger(x)))return null;return((p[0]<<24)>>>0)+(p[1]<<16)+(p[2]<<8)+p[3]};
+const n2ip=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+const msel=$('#mask');for(let i=0;i<=32;i++){const m=i?(0xffffffff<<(32-i))>>>0:0;msel.insertAdjacentHTML('beforeend',`<option value="${i}">/${i} — ${n2ip(m)}</option>`)}
+function subnet(){let[v,pf]=$('#cidr').value.trim().split('/');const n=ip2n(v);if(pf!==undefined)msel.value=pf;pf=+msel.value;
+if(n===null||pf<0||pf>32||isNaN(pf)){$('#sres').innerHTML='<dt>Ошибка</dt><dd style="color:var(--bad)">кривой адрес — формат 10.0.0.1/24</dd>';return}
+const m=pf?(0xffffffff<<(32-pf))>>>0:0,net=(n&m)>>>0,bc=(net|(~m>>>0))>>>0,tot=2**(32-pf);
+const first=pf>=31?net:net+1,last=pf>=31?bc:bc-1,hosts=pf===32?1:pf===31?2:tot-2;
+const cls=(n>>>24)<128?'A':(n>>>24)<192?'B':(n>>>24)<224?'C':(n>>>24)<240?'D (multicast)':'E';
+const priv=(n>>>24)===10||((n>>>20)===0xac1)||((n>>>16)===0xc0a8)?'да (RFC1918)':((n>>>22)===(0x64400000>>>22)?'CGNAT (100.64/10)':'нет');
+const rows=[['Сеть',n2ip(net)+'/'+pf],['Маска',n2ip(m)],['Wildcard',n2ip(~m>>>0)],['Broadcast',n2ip(bc)],['Хосты',n2ip(first)+' — '+n2ip(last)],['Кол-во хостов',hosts.toLocaleString('ru')],['Класс',cls],['Приватный',priv],['MikroTik','/ip address add address='+n2ip(n)+'/'+pf+' interface=bridge']];
+$('#sres').innerHTML=rows.map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}
+$('#cidr').oninput=subnet;msel.onchange=()=>{const v=$('#cidr').value.split('/')[0];$('#cidr').value=v+'/'+msel.value;subnet()};subnet();
+
+/* ---------- passwords ---------- */
+function genPw(){const L=+$('#prange').value,amb=$('#pA').checked;let sets=[];
+if($('#pU').checked)sets.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');if($('#pL').checked)sets.push('abcdefghijklmnopqrstuvwxyz');if($('#pD').checked)sets.push('0123456789');if($('#pS').checked)sets.push('!@#$%^&*-_=+?');
+if(!sets.length){$('#pw').textContent='выбери хоть что-нибудь';return}
+if(amb)sets=sets.map(s=>s.replace(/[0Ol1I]/g,''));const all=sets.join('');const r=new Uint32Array(L);crypto.getRandomValues(r);
+let pw=[...r].map(x=>all[x%all.length]);sets.forEach((s,i)=>{if(i<L){const q=new Uint32Array(2);crypto.getRandomValues(q);pw[q[0]%L]=s[q[1]%s.length]}});
+pw=pw.join('');$('#pw').textContent=pw;const bits=Math.round(L*Math.log2(all.length));
+$('#pent').textContent=`≈${bits} бит энтропии — ${bits<50?'слабовато':bits<80?'норм':bits<120?'крепкий':'параноидальный'}`}
+$('#prange').oninput=e=>{$('#plen').textContent=e.target.value;genPw()};$$('.chk input').forEach(i=>i.onchange=genPw);$('#pgen').onclick=genPw;$('#pw').onclick=()=>copy($('#pw').textContent);genPw();
+
+/* ---------- MikroTik cheatsheet ---------- */
+const MT=[['Бэкап конфига','/export file=backup-$(date)\n/system backup save name=full'],['Бэкап (правильно)','/export show-sensitive file=cfg'],['Сброс без дефолта','/system reset-configuration no-defaults=yes skip-backup=yes'],
+['DHCP клиенты','/ip dhcp-server lease print'],['DHCP статика из lease','/ip dhcp-server lease make-static [find address=192.168.88.50]'],
+['Кто грузит канал','/tool torch interface=ether1'],['Пинг с источника','/ping 8.8.8.8 src-address=192.168.88.1 count=5'],['Трассировка','/tool traceroute 8.8.8.8'],
+['NAT masquerade','/ip firewall nat add chain=srcnat out-interface-list=WAN action=masquerade'],['Проброс порта','/ip firewall nat add chain=dstnat protocol=tcp dst-port=3389 in-interface-list=WAN action=dst-nat to-addresses=192.168.88.10'],
+['Drop invalid','/ip firewall filter add chain=input connection-state=invalid action=drop'],['Список адресов','/ip firewall address-list add list=trusted address=10.0.0.0/8'],
+['SSTP клиент','/interface sstp-client add name=sstp-hub connect-to=hub.example.ru user=spoke1 password=*** profile=default-encryption'],['WireGuard ключ','/interface wireguard print detail'],
+['Failover по distance','/ip route add dst-address=0.0.0.0/0 gateway=lte1 distance=2 check-gateway=ping'],['Netwatch','/tool netwatch add host=8.8.8.8 interval=10s down-script=":log warning WAN down"'],
+['LTE сигнал','/interface lte monitor lte1 once'],['Отправить SMS','/tool sms send lte1 phone-number=+79990000000 message="test"'],
+['Логи с фильтром','/log print where topics~"error"'],['Ресурсы','/system resource print'],['Обновить RouterOS','/system package update check-for-updates\n/system package update install'],
+['Прошивка RouterBOOT','/system routerboard upgrade\n/system reboot'],['Отключить лишние сервисы','/ip service disable telnet,ftp,www,api,api-ssl'],['MAC-доступ только LAN','/tool mac-server set allowed-interface-list=LAN']];
+function cheat(){const q=$('#cheatq').value.toLowerCase();$('#cheat').innerHTML=MT.filter(m=>(m[0]+m[1]).toLowerCase().includes(q)).map(m=>`<div class="card"><h4>${m[0]}</h4><code title="клик — скопировать">${m[1].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</code></div>`).join('')||'<p style="color:var(--mut)">ничего. попробуй «/export».</p>';
+$$('#cheat code').forEach(c=>c.onclick=()=>copy(c.innerText))}
+$('#cheatq').oninput=cheat;cheat();
+
+/* tabs */
+$$('#tabs .tab').forEach(t=>t.onclick=()=>{$$('#tabs .tab').forEach(x=>x.classList.remove('on'));$$('.pane').forEach(x=>x.classList.remove('on'));t.classList.add('on');$('#p-'+t.dataset.p).classList.add('on')});
+
+/* ---------- terminal ---------- */
+const out=$('#out'),cmd=$('#cmd'),hist=[];let hi=0;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const print=(s,c='')=>{out.insertAdjacentHTML('beforeend',`<div class="${c}">${s}</div>`);out.scrollTop=out.scrollHeight};
+const FORT=['Работает — не трогай.','Бэкапы делятся на два типа: те, что уже делают, и те, что начнут после потери данных.','Нет ничего более постоянного, чем временное решение.','Самый надёжный firewall — выдернутый кабель.','Если сломалось в пятницу — сломалось до понедельника.','It\'s always DNS.','Пользователь всегда прав. Неправ его компьютер.'];
+const CMDS={
+help:()=>`<span class="c">Доступно:</span>
+  whoami     кто я
+  about      что за сайт
+  skills     стек
+  neofetch   инфа о системе
+  ping HOST  попинговать
+  excuse     отмазка админа
+  fortune    мудрость
+  date       время
+  ls / cat   файлы
+  game       перейти к игре
+  snake/mine аркада
+  dig NAME   DNS-запрос (настоящий)
+  myip       твой внешний IP
+  status     всё ли упало
+  hack       режим хакера
+  theme      сменить тему
+  rack       серверная
+  config     конфигуратор MikroTik
+  uuid       новый UUID
+  blog       заметки
+  matrix     ...
+  sudo       попробуй
+  clear      очистить`,
+whoami:()=>'guest — гость. Права: только смотреть. Как у бухгалтерии.',
+about:()=>'ne-for.ru — «не для всех». Личный сайт-песочница админа: терминал, тулзы, игра.',
+skills:()=>'<span class="p">network</span>  MikroTik, Cisco ASA, VPN, LTE failover\n<span class="p">servers</span>  Windows Server, AD, VMware\n<span class="p">ops</span>      Zabbix, GLPI, Snipe-IT, PowerShell\n<span class="p">voice</span>    Avaya IP Office\n<span class="p">docs</span>     ЭДО, ЭП/МЧД, Честный ЗНАК',
+neofetch:()=>`<span class="p">       ▄▄▄▄▄       </span>  <span class="p">guest</span>@<span class="p">ne-for</span>
+<span class="p">     ▄█▀   ▀█▄     </span>  ------------
+<span class="p">    █▀ &gt;_    ▀█    </span>  <span class="c">OS</span>: ne-forOS 1.0 (не для всех)
+<span class="p">    █▄       ▄█    </span>  <span class="c">Host</span>: GitHub Pages
+<span class="p">     ▀█▄▄▄▄▄█▀     </span>  <span class="c">Kernel</span>: JavaScript ${new Date().getFullYear()}
+                     <span class="c">Uptime</span>: ${$('#uptime').textContent}
+                     <span class="c">Shell</span>: nefsh
+                     <span class="c">CPU</span>: ${navigator.hardwareConcurrency||'?'} ядер твоего браузера
+                     <span class="c">Coffee</span>: ${$('#cof').textContent} чашки`,
+excuse:()=>'<span class="w">'+excuse()+'</span>',
+fortune:()=>'<span class="c">'+rnd(FORT)+'</span>',
+date:()=>new Date().toLocaleString('ru'),
+ls:()=>'<span class="c">secrets/</span>  passwords.txt  todo.md  README.md',
+cat:a=>({'passwords.txt':'<span class="e">cat: passwords.txt: хорошая попытка</span>','todo.md':'- [ ] сделать бэкап\n- [ ] проверить бэкап\n- [x] отложить на понедельник','README.md':'Не для всех. Но раз уж зашёл — help.','secrets/':'cat: secrets/: это каталог. И секретный.'})[a]||(a?`cat: ${esc(a)}: нет такого файла`:'cat: а что читать-то?'),
+cd:a=>a==='secrets'||a==='secrets/'?'<span class="e">Permission denied. Ты ne-for.</span>':'cd: некуда идти',
+rm:a=>/-rf/.test(a)?'<span class="e">rm: ага, щас.</span>':'rm: ничего не удалено',
+sudo:a=>a?'<span class="e">guest is not in the sudoers file. This incident will be reported.</span>':'sudo: а что делать-то?',
+exit:()=>'Отсюда не уходят. Но можно промотать вниз.',
+reboot:()=>{setTimeout(()=>{out.innerHTML='';boot()},600);return '<span class="w">Перезагрузка... как обычно помогает.</span>'},
+game:()=>{location.hash='game';return 'Поехали →'},
+matrix:()=>{document.getElementById('matrix').style.opacity=document.getElementById('matrix').style.opacity==='0.5'?'':'0.5';return '<span class="p">Wake up, Neo...</span>'},
+clear:()=>{out.innerHTML='';return null},
+ping:a=>{if(!a)return 'ping: укажи хост';let i=0;const iv=setInterval(()=>{i++;const t=(Math.random()*30+8).toFixed(1);print(i===3&&/1c|бух/i.test(a)?`Request timeout for icmp_seq=${i} (бухгалтерия опять что-то нажала)`:`64 bytes from ${esc(a)}: icmp_seq=${i} ttl=57 time=${t} ms`,i===3&&/1c|бух/i.test(a)?'e':'');if(i>=4){clearInterval(iv);print(`--- ${esc(a)} ping statistics: 4 packets transmitted`,'m')}},450);return `PING ${esc(a)} 56(84) bytes of data.`},
+};
+CMDS.hello=CMDS.privet=()=>'Привет! Набери help.';CMDS['привет']=CMDS.hello;CMDS.coffee=()=>'☕ Готовлю... HTTP 418 I\'m a teapot';
+function run(line){const [c,...r]=line.trim().split(/\s+/);const a=r.join(' ');print(`<span class="p">guest@ne-for:~$</span> ${esc(line)}`);if(!c)return;
+const f=CMDS[c.toLowerCase()];if(f){const res=f(a);if(res!==null&&res!==undefined)print(res)}else print(`nefsh: ${esc(c)}: команда не найдена. Попробуй help`,'e')}
+function boot(){['[ OK ] Монтирую кофе...','[ OK ] Поднимаю DNS (молимся)...','[ OK ] Проверяю бэкапы... <span class="w">(лучше не смотреть)</span>','','Добро пожаловать на <span class="p">ne-for.ru</span>. Набери <span class="c">help</span>.'].forEach((l,i)=>setTimeout(()=>print(l,i<3?'m':''),i*220))}
+boot();
+$('#tform').onsubmit=e=>{e.preventDefault();const v=cmd.value;if(v.trim()){hist.push(v);hi=hist.length}run(v);cmd.value=''};
+cmd.onkeydown=e=>{if(e.key==='ArrowUp'&&hi>0){cmd.value=hist[--hi];e.preventDefault()}else if(e.key==='ArrowDown'){hi=Math.min(hist.length,hi+1);cmd.value=hist[hi]||''}else if(e.key==='Tab'){e.preventDefault();const m=Object.keys(CMDS).filter(k=>k.startsWith(cmd.value));if(m.length===1)cmd.value=m[0]}};
+$('.term').onclick=()=>cmd.focus();
+['help','neofetch','excuse','ping 1c-server','dig ne-for.ru','myip','snake','fortune','sudo rm -rf /','cat todo.md'].forEach(c=>{const b=document.createElement('button');b.className='chip';b.textContent=c;b.onclick=()=>{run(c);cmd.focus()};$('#chips').append(b)});
+
+/* ---------- game ---------- */
+const N=24,sw=$('#sw');let ports=[],score=0,time=45,timer=null,spawn=null,playing=false,best=0;
+try{best=+localStorage.getItem('nefor-best')||0}catch(e){}
+$('#gb').textContent=best;
+for(let i=0;i<N;i++){const p=document.createElement('div');p.className='port up';p.onclick=()=>hit(i);sw.append(p);ports.push({el:p,st:'up',hp:0})}
+const MSG=['Бухгалтерия звонит...','Директор спрашивает, почему не работает интернет','Кто-то вставил оба конца патч-корда в свитч','Принтер опять ушёл в петлю','Новенький подключил свой роутер','Всё хорошо. Подозрительно хорошо.'];
+function setSt(i,st){const p=ports[i];p.st=st;p.el.className='port '+st;if(st==='boss')p.hp=3}
+function hit(i){if(!playing)return;const p=ports[i];if(p.st==='down'){setSt(i,'up');score++}else if(p.st==='boss'){if(--p.hp<=0){setSt(i,'up');score+=5}}$('#gs').textContent=score}
+function tick(){const up=ports.filter(p=>p.st==='up').map((p,_)=>ports.indexOf(p));if(!up.length)return;const k=rnd(up);setSt(k,Math.random()<.1?'boss':'down');
+const down=ports.filter(p=>p.st!=='up').length;if(down>N/2)end(true);if(Math.random()<.15)$('#gmsg').textContent=rnd(MSG)}
+function end(fired){playing=false;clearInterval(timer);clearTimeout(spawn);if(score>best){best=score;try{localStorage.setItem('nefor-best',best)}catch(e){}$('#gb').textContent=best}
+$('#gmsg').innerHTML=fired?`<span style="color:var(--bad)">Сеть легла. Ты уволен.</span> Очки: ${score}. Попробуй ещё.`:`<span style="color:var(--acc)">Смена окончена!</span> Очки: ${score}. ${score>60?'Премия (нет).':score>30?'Норм, живём.':'Директор недоволен.'}`;$('#gstart').textContent='Ещё смену'}
+function loop(){if(!playing)return;tick();const sp=Math.max(220,900-(45-time)*16);spawn=setTimeout(loop,sp)}
+$('#gstart').onclick=()=>{ports.forEach((_,i)=>setSt(i,'up'));score=0;time=45;$('#gs').textContent=0;$('#gt').textContent=time;playing=true;$('#gmsg').textContent='Смена началась. Держись.';
+clearInterval(timer);timer=setInterval(()=>{$('#gt').textContent=--time;if(time<=0)end(false)},1000);loop()};
+</script>
+<script src="assets/qrcode.js"></script>
+<script src="assets/marked.js"></script>
+<script src="assets/js-yaml.js"></script>
+<script src="assets/md5.js"></script>
+<script src="assets/extra.js"></script>
+<script src="assets/v3.js"></script>
+</body>
+</html>
