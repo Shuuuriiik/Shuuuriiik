@@ -1,7 +1,81 @@
 [
-  {"slug":"mikrotik-lte-failover","title":"MikroTik: резервный LTE-канал через рекурсивные маршруты","date":"2026-09-20","desc":"Почему check-gateway на шлюз провайдера не спасает и как сделать нормальный failover на LTE.","tags":["mikrotik","сеть"],"min":5},
-  {"slug":"ad-inactive-users","title":"PowerShell: найти и выключить мёртвые учётки в AD","date":"2026-09-12","desc":"Кто не логинился 90 дней — отключаем, переносим в отдельную OU, отчёт в CSV.","tags":["powershell","ad"],"min":4},
-  {"slug":"zabbix-mikrotik-snmp","title":"Zabbix + MikroTik по SNMP за 10 минут","date":"2026-09-05","desc":"Включаем SNMP на роутере, ограничиваем доступ, цепляем шаблон в Zabbix.","tags":["mikrotik","zabbix","мониторинг"],"min":4},
-  {"slug":"nothing-works-checklist","title":"«У меня ничего не работает»: чек-лист на 5 минут","date":"2026-08-28","desc":"Порядок проверки от кабеля до DNS. Спойлер: это DNS.","tags":["сеть","windows"],"min":3},
-  {"slug":"github-pages-domain","title":"Как этот сайт живёт бесплатно на GitHub Pages","date":"2026-09-29","desc":"Свой домен .ru, HTTPS от Let's Encrypt и ноль рублей за хостинг.","tags":["web","dns"],"min":3}
+ {
+  "slug": "mikrotik-vlan",
+  "title": "VLAN на MikroTik: bridge VLAN filtering в RouterOS 7",
+  "date": "2026-09-30",
+  "desc": "Офис, бухгалтерия и гости на одном роутере. Access-порты, транк и изоляция через firewall.",
+  "tags": [
+   "mikrotik",
+   "сеть"
+  ],
+  "min": 6
+ },
+ {
+  "slug": "glpi-agent",
+  "title": "GLPI Agent: разворачиваем инвентаризацию на все ПК",
+  "date": "2026-09-30",
+  "desc": "Тихая установка MSI, раскатка через GPO и грабли с сертификатами и дублями.",
+  "tags": [
+   "glpi",
+   "windows",
+   "ad"
+  ],
+  "min": 5
+ },
+ {
+  "slug": "mikrotik-lte-failover",
+  "title": "MikroTik: резервный LTE-канал через рекурсивные маршруты",
+  "date": "2026-09-20",
+  "desc": "Почему check-gateway на шлюз провайдера не спасает и как сделать нормальный failover на LTE.",
+  "tags": [
+   "mikrotik",
+   "сеть"
+  ],
+  "min": 5
+ },
+ {
+  "slug": "ad-inactive-users",
+  "title": "PowerShell: найти и выключить мёртвые учётки в AD",
+  "date": "2026-09-12",
+  "desc": "Кто не логинился 90 дней — отключаем, переносим в отдельную OU, отчёт в CSV.",
+  "tags": [
+   "powershell",
+   "ad"
+  ],
+  "min": 4
+ },
+ {
+  "slug": "zabbix-mikrotik-snmp",
+  "title": "Zabbix + MikroTik по SNMP за 10 минут",
+  "date": "2026-09-05",
+  "desc": "Включаем SNMP на роутере, ограничиваем доступ, цепляем шаблон в Zabbix.",
+  "tags": [
+   "mikrotik",
+   "zabbix",
+   "мониторинг"
+  ],
+  "min": 4
+ },
+ {
+  "slug": "nothing-works-checklist",
+  "title": "«У меня ничего не работает»: чек-лист на 5 минут",
+  "date": "2026-08-28",
+  "desc": "Порядок проверки от кабеля до DNS. Спойлер: это DNS.",
+  "tags": [
+   "сеть",
+   "windows"
+  ],
+  "min": 3
+ },
+ {
+  "slug": "github-pages-domain",
+  "title": "Как этот сайт живёт бесплатно на GitHub Pages",
+  "date": "2026-09-29",
+  "desc": "Свой домен .ru, HTTPS от Let's Encrypt и ноль рублей за хостинг.",
+  "tags": [
+   "web",
+   "dns"
+  ],
+  "min": 3
+ }
 ]

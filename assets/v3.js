@@ -30,7 +30,7 @@ $('#humBtn').onclick=()=>{if(hum){humStop();return}if(!soundOn)setSound(true);hu
 const THEMES=[['','зелёная'],['t-amber','янтарь'],['t-ice','лёд'],['t-light','офис']];
 let ti=Math.max(0,THEMES.findIndex(t=>t[0]===store.get('nefor-theme','')));
 function applyTheme(i){THEMES.forEach(t=>t[0]&&document.body.classList.remove(t[0]));ti=(i+THEMES.length)%THEMES.length;if(THEMES[ti][0])document.body.classList.add(THEMES[ti][0]);store.set('nefor-theme',THEMES[ti][0]);$('#themeBtn').textContent='тема: '+THEMES[ti][1];rackDraw&&rackDraw();unDraw&&unDraw()}
-$('#themeBtn').onclick=()=>{applyTheme(ti+1);tone(440+ti*110,.05)};
+$('#themeBtn').onclick=()=>{applyTheme(ti+1);window.ach?.('theme');tone(440+ti*110,.05)};
 
 /* ================= КОНФИГУРАТОР MIKROTIK ================= */
 const F=id=>document.getElementById('mt-'+id);
@@ -167,8 +167,8 @@ function genMT(){
   genMT.last=code;return code;
 }
 $('#mtform').addEventListener('input',genMT);$('#mtform').addEventListener('change',genMT);$('#mtform').onsubmit=e=>e.preventDefault();
-$('#mt-copy').onclick=()=>copy(genMT.last);
-$('#mt-dl').onclick=()=>{const b=new Blob([genMT.last.replace(/\n/g,'\r\n')],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(F('id').value.trim()||'mikrotik')+'.rsc';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+$('#mt-copy').onclick=()=>{copy(genMT.last);window.ach?.('mtconf')};
+$('#mt-dl').onclick=()=>{window.ach?.('mtconf');const b=new Blob([genMT.last.replace(/\n/g,'\r\n')],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(F('id').value.trim()||'mikrotik')+'.rsc';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 genMT();
 
 /* ================= СЕРВЕРНАЯ ================= */
@@ -215,7 +215,7 @@ function info(){const d=sel;$('#rackinfo').innerHTML=`<div><h3>${h(d.name)}</h3>
   <div class="rlog" id="rlog">${d.lines.map(l=>'<div>'+l+'</div>').join('')}</div>
   <div class="row">${d.boot?`<button class="btn ghost" id="rboot" style="flex:0 0 auto">Перезагрузить</button>`:''}${d.id==='ups'?'<button class="btn ghost" id="rtest" style="flex:0 0 auto">Тест батареи</button>':''}${!d.boot&&d.id!=='ups'?'<span style="color:var(--mut);font-size:13px">Пассивное железо. Перезагружать нечего, но можно поправить кабели ниже.</span>':''}</div>`;
   const rb=$('#rboot');if(rb)rb.onclick=()=>reboot(d);const rt=$('#rtest');if(rt)rt.onclick=()=>{rlog(d,'самотест: переход на батарею…','w');tone(2000,.4,'square',.03);setTimeout(()=>{rlog(d,'батарея: 97%, расчётное время 12 мин');rlog(d,'самотест пройден')},2200)}}
-function reboot(d){if(!d.on)return;d.on=false;rlog(d,'получена команда reboot','w');info();rackDraw();
+function reboot(d){if(!d.on)return;window.ach?.('reboot');d.on=false;rlog(d,'получена команда reboot','w');info();rackDraw();
   setTimeout(()=>{postBeep();rlog(d,'POST… OK')},1400);setTimeout(()=>{rlog(d,'загрузка ОС…')},2300);
   setTimeout(()=>{d.on=true;d.up=0;d.load=65;rlog(d,'сервис запущен. Пользователи ничего не заметили (почти).');if(d===sel)info();rackDraw()},3800)}
 function pickDev(e){const r=RK.getBoundingClientRect(),y=(e.clientY-r.top)/r.height*148;const u=Math.floor((y-Y0)/U)+1;return DEV.find(d=>u>=d.u&&u<d.u+d.h)}
@@ -246,7 +246,7 @@ function unDraw(){if(!uN.length)return;const {n,bad}=crossings();$('#unx').textC
   uE.forEach(([a,b],i)=>{const p=uN[a],q=uN[b],mx=(p.x+q.x)/2,my=(p.y+q.y)/2;ux.strokeStyle=bad.has(i)?badc:CAB[i%CAB.length];ux.lineWidth=bad.has(i)?6:5;ux.globalAlpha=bad.has(i)?1:.9;ux.beginPath();ux.moveTo(p.x,p.y);ux.lineTo(q.x,q.y);ux.stroke();ux.globalAlpha=1});
   uN.forEach((p,i)=>{ux.fillStyle=card;ux.strokeStyle=uDrag===i?acc:(uDone?acc:txt);ux.lineWidth=uDrag===i?3:2;ux.beginPath();ux.roundRect(p.x-NR,p.y-NR*.8,NR*2,NR*1.6,4);ux.fill();ux.stroke();
     ux.fillStyle=uDone?acc:txt;for(let k=0;k<4;k++)ux.fillRect(p.x-8+k*4.5,p.y-5,2,6);ux.fillRect(p.x-5,p.y+4,10,3)});
-  if(n===0&&!uDone&&uMoves>0){uDone=true;chime();toast(`Уровень ${uLvl} распутан за ${uMoves} ходов`);$('#unnext').hidden=false;store.set('nefor-untangle',uLvl+1);unDraw()}}
+  if(n===0&&!uDone&&uMoves>0){uDone=true;chime();toast(`Уровень ${uLvl} распутан за ${uMoves} ходов`);$('#unnext').hidden=false;store.set('nefor-untangle',uLvl+1);if(uLvl>=5)window.ach?.('cables');unDraw()}}
 const upos=e=>{const r=UC.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*UW,y:(e.clientY-r.top)/r.height*UH}};
 UC.addEventListener('pointerdown',e=>{const p=upos(e);let best=-1,bd=30*30;uN.forEach((n,i)=>{const d=(n.x-p.x)**2+(n.y-p.y)**2;if(d<bd){bd=d;best=i}});if(best>=0){uDrag=best;UC.setPointerCapture(e.pointerId);UC.style.cursor='grabbing';click();unDraw()}});
 UC.addEventListener('pointermove',e=>{if(uDrag===null)return;const p=upos(e);uN[uDrag].x=Math.max(NR,Math.min(UW-NR,p.x));uN[uDrag].y=Math.max(NR,Math.min(UH-NR,p.y));unDraw()});
@@ -355,7 +355,7 @@ Get-WinEvent -FilterHashtable @{LogName='Security';Id=4625} -MaxEvents 50 |
     Group-Object {$_.Properties[5].Value} | Sort-Object Count -Descending
 `;
 let hp=0,hk=0;const HO=$('#hack'),HP=$('#hackpre');
-function hackOpen(){HO.hidden=false;HP.textContent='';hp=0;hk=0;document.body.style.overflow='hidden'}
+function hackOpen(){HO.hidden=false;window.ach?.('hack');HP.textContent='';hp=0;hk=0;document.body.style.overflow='hidden'}
 function hackClose(){HO.hidden=true;$('#granted').hidden=true;document.body.style.overflow=''}
 function hackType(){const n=3+Math.floor(Math.random()*4);HP.textContent+=HACK.slice(hp,hp+n);hp=(hp+n)%HACK.length;if(HP.textContent.length>6000)HP.textContent=HP.textContent.slice(-4000);click();
   if(++hk%70===0){const g=$('#granted'),ok=Math.random()>.3;g.textContent=ok?'ACCESS GRANTED':'ACCESS DENIED';g.classList.toggle('den',!ok);g.hidden=false;ok?chime():tone(120,.4,'sawtooth',.06);setTimeout(()=>g.hidden=true,1600)}}

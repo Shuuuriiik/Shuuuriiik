@@ -43,7 +43,7 @@ a{color:#fff}
 </main>
 <script src="/assets/qrcode.js"></script>
 <script>
-document.getElementById('path').textContent=location.pathname;
+document.getElementById('path').textContent=location.pathname;try{localStorage.setItem('nefor-404','1')}catch(e){}
 try{const q=qrcode(0,'L');q.addData('https://ne-for.ru/');q.make();const n=q.getModuleCount(),c=document.createElement('canvas');c.width=c.height=n;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,n,n);x.fillStyle='#0078d7';for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(k,r,1,1);document.getElementById('qr').append(c)}catch(e){document.getElementById('qr').remove()}
 let p=0;const el=document.getElementById('p');
 (function step(){p=Math.min(100,p+Math.floor(Math.random()*9)+(p>80?0:2));el.textContent=p;if(p<100)setTimeout(step,250+Math.random()*700);else setTimeout(()=>location.href='/',1500)})();

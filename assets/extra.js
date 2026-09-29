@@ -129,7 +129,7 @@ function sStep(){
   if(sPaused)return;dir=ndir;const hd={x:sn[0].x+dir.x,y:sn[0].y+dir.y};
   if(hd.x<0||hd.y<0||hd.x>=GW||hd.y>=GH||sn.some(s=>s.x===hd.x&&s.y===hd.y))return sOver();
   sn.unshift(hd);if(hd.x===food.x&&hd.y===food.y){sScore++;$('#ss').textContent=sScore;sPlace();clearInterval(sLoop);sLoop=setInterval(sStep,Math.max(55,130-sScore*3))}else sn.pop();sDraw()}
-function sOver(){clearInterval(sLoop);sAlive=false;if(sScore>sBest){sBest=sScore;store.set('nefor-snake',sBest);$('#sb').textContent=sBest}
+function sOver(){clearInterval(sLoop);sAlive=false;if(sScore>=10)window.ach?.('snake');if(sScore>sBest){sBest=sScore;store.set('nefor-snake',sBest);$('#sb').textContent=sBest}
   sDraw();sx.fillStyle='rgba(0,0,0,.6)';sx.fillRect(0,0,cv.width,cv.height);sx.fillStyle='#ff4d6d';sx.font='bold 26px monospace';sx.textAlign='center';sx.fillText('PACKET LOSS 100%',cv.width/2,cv.height/2-6);
   sx.fillStyle='#d8e6dd';sx.font='14px monospace';sx.fillText(`доставлено пакетов: ${sScore}`,cv.width/2,cv.height/2+22);$('#sstart').textContent='Ещё раз'}
 function sStart(){sn=[{x:6,y:8},{x:5,y:8},{x:4,y:8}];dir=ndir={x:1,y:0};sScore=0;$('#ss').textContent=0;sPlace();sPaused=false;sAlive=true;clearInterval(sLoop);sLoop=setInterval(sStep,130);sDraw()}
@@ -158,7 +158,7 @@ function mDig(i){if(mDone||mFlag.has(i)||mOpen.has(i))return;
   if(!mStarted){mPlant(i);mStarted=true;mTimer=setInterval(()=>$('#mt').textContent=++mSec,1000)}
   if(mf[i]===-1){mDone=true;clearInterval(mTimer);mf.forEach((v,j)=>{if(v===-1)mOpen.add(j)});mRender(i);$('#mmsg').innerHTML='<span style="color:var(--bad)">БП бахнул. Серверная в дыму.</span> Жми «Новая».';return}
   const st=[i];while(st.length){const c=st.pop();if(mOpen.has(c)||mFlag.has(c))continue;mOpen.add(c);if(mf[c]===0)nb(c).forEach(n=>!mOpen.has(n)&&st.push(n))}
-  if(mOpen.size===MW*MH-MM){mDone=true;clearInterval(mTimer);const b=store.get('nefor-mine',0);if(!b||mSec<b)store.set('nefor-mine',mSec);$('#mmsg').innerHTML=`<span style="color:var(--acc)">Серверная спасена за ${mSec} с!</span> Лучшее: ${Math.min(b||mSec,mSec)} с.`}
+  if(mOpen.size===MW*MH-MM){mDone=true;window.ach?.('mine');clearInterval(mTimer);const b=store.get('nefor-mine',0);if(!b||mSec<b)store.set('nefor-mine',mSec);$('#mmsg').innerHTML=`<span style="color:var(--acc)">Серверная спасена за ${mSec} с!</span> Лучшее: ${Math.min(b||mSec,mSec)} с.`}
   mRender()}
 function mToggle(i){if(mDone||mOpen.has(i))return;mFlag.has(i)?mFlag.delete(i):mFlag.add(i);$('#mleft').textContent=MM-mFlag.size;mRender()}
 function mRender(boom){$('#mine').innerHTML=mf.map((v,i)=>{if(mOpen.has(i)){if(v===-1)return `<div class="o${i===boom?' x':''}">✹</div>`;return `<div class="o" style="color:${NC[v]}">${v||''}</div>`}
@@ -185,7 +185,7 @@ const CALLS=[
 let cOrder,cIdx,cKarma;
 function cNew(){cOrder=[...CALLS].sort(()=>Math.random()-.5);cIdx=0;cKarma=50;cShow()}
 function cShow(){$('#ck').textContent=cKarma;
-  if(cIdx>=cOrder.length){const v=cKarma>=150?'Легенда поддержки. Пользователи носят тебе печеньки.':cKarma>=100?'Крепкий админ. Премию дадут (может быть).':cKarma>=50?'Нормально. Живём.':'Тебя ищут с вилами. Может, в разработчики?';
+  if(cIdx>=cOrder.length){if(cKarma>=100)window.ach?.('call');const v=cKarma>=150?'Легенда поддержки. Пользователи носят тебе печеньки.':cKarma>=100?'Крепкий админ. Премию дадут (может быть).':cKarma>=50?'Нормально. Живём.':'Тебя ищут с вилами. Может, в разработчики?';
     $('#cwho').innerHTML='<b>Смена окончена</b>';$('#cq').textContent=`Итоговая карма: ${cKarma}. ${v}`;$('#cans').innerHTML='';$('#cmsg').textContent='';$('#cn').textContent=cOrder.length;return}
   const c=cOrder[cIdx];$('#cn').textContent=cIdx+1;$('#cwho').innerHTML=`📞 Звонит: <b>${c.w}</b>`;$('#cq').textContent=c.q;$('#cmsg').textContent='';
   const ans=[...c.a].sort(()=>Math.random()-.5);
@@ -249,7 +249,7 @@ async function blogInit(){
 function blogList(){const list=POSTS.filter(p=>tag==='все'||p.tags.includes(tag));
   $('#posts').innerHTML=list.map(p=>`<button class="post" data-s="${h(p.slug)}"><div class="d">${new Date(p.date).toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})} · ${p.min||3} мин</div><h3>${h(p.title)}</h3><p>${h(p.desc)}</p><div class="tg">${p.tags.map(t=>`<span>#${h(t)}</span>`).join('')}</div></button>`).join('');
   document.querySelectorAll('.post').forEach(b=>b.onclick=()=>location.hash='post/'+b.dataset.s)}
-async function openPost(slug){const p=POSTS.find(x=>x.slug===slug);if(!p)return;
+async function openPost(slug){const p=POSTS.find(x=>x.slug===slug);if(!p)return;window.achSet?.('blog',slug,3,'reader');
   $('#reader').hidden=false;document.body.style.overflow='hidden';$('#rbody').innerHTML='<p style="color:var(--mut)">Загружаю…</p>';
   try{const md=await (await fetch(`posts/${slug}.md`,{cache:'no-cache'})).text();
     const html=typeof marked!=='undefined'?marked.parse(md):'<pre>'+h(md)+'</pre>';
@@ -257,7 +257,7 @@ async function openPost(slug){const p=POSTS.find(x=>x.slug===slug);if(!p)return;
     $('#rbody').querySelectorAll('pre').forEach(pre=>{const b=document.createElement('button');b.className='cpy';b.textContent='copy';b.onclick=()=>copy(pre.querySelector('code')?.innerText||pre.innerText);pre.append(b)});
     document.title=p.title+' — ne-for.ru'}catch(e){$('#rbody').innerHTML='<p style="color:var(--bad)">Не загрузилось.</p>'}}
 function closePost(){$('#reader').hidden=true;document.body.style.overflow='';document.title='ne-for.ru — не для всех';if(location.hash.startsWith('#post/'))history.replaceState(null,'','#blog')}
-function route(){const m=location.hash.match(/^#post\/(.+)$/);if(m)openPost(decodeURIComponent(m[1]));else if(!$('#reader').hidden)closePost()}
+function route(){const m=location.hash.match(/^#post\/(.+)$/);if(m)openPost(decodeURIComponent(m[1]));else if(!$('#reader').hidden&&!location.hash.startsWith('#guide='))closePost()}
 addEventListener('hashchange',route);$('#rclose').onclick=closePost;$('#reader').onclick=e=>{if(e.target.id==='reader')closePost()};
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#reader').hidden)closePost()});
 blogInit();
@@ -283,7 +283,7 @@ Object.assign(CMDS,{
 /* ============ ПАСХАЛКИ ============ */
 const KON=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];let kp=0;
 addEventListener('keydown',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;const want=KON[kp];
-  if(k===want||(want==='b'&&k==='и')||(want==='a'&&k==='ф')){kp++;if(kp===KON.length){kp=0;const on=document.body.classList.toggle('root');toast(on?'🔓 root-режим активирован':'root-режим выключен');print(on?'<span class="e"># Добро пожаловать, root. Ничего не трогай.</span>':'<span class="m">$ снова guest</span>')}}
+  if(k===want||(want==='b'&&k==='и')||(want==='a'&&k==='ф')){kp++;if(kp===KON.length){kp=0;const on=document.body.classList.toggle('root');if(on)window.ach?.('root');toast(on?'🔓 root-режим активирован':'root-режим выключен');print(on?'<span class="e"># Добро пожаловать, root. Ничего не трогай.</span>':'<span class="m">$ снова guest</span>')}}
   else kp=k===KON[0]?1:0});
 let lc=0;$('.logo').addEventListener('click',()=>{if(++lc===7){lc=0;document.querySelector('h1').animate([{transform:'rotate(0)'},{transform:'rotate(360deg)'}],{duration:900,easing:'ease-in-out'});toast('Не для всех. Но ты — ok.')}});
 console.log('%c>_ ne-for.ru','font:800 28px monospace;color:#39ff88;background:#07090a;padding:6px 12px;border-radius:6px');
