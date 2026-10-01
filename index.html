@@ -619,6 +619,31 @@ body.t-light #matrix{display:block;opacity:.35}
 .xl-st{background:#1d6f42;color:#fff;font-size:11px;padding:3px 12px}
 /* ===== ne-forOS: вход на главной ===== */
 #osentry{border-top:0;padding-top:10px}
+/* интеграции */
+.live-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:18px}
+@media(min-width:900px){.live-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lv-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;min-width:0}
+.lv-card[hidden]{display:none}
+.lv-h{display:flex;align-items:center;gap:10px;margin-bottom:10px}.lv-h b{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis}.lv-h em{margin-left:auto;font-style:normal;color:var(--mut);font-size:12px;white-space:nowrap}
+.lv-ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc);flex:none}
+.lv-av{width:30px;height:30px;border-radius:8px;flex:none}
+.lv-list{list-style:none;margin:0;padding:0;font-size:13px}.lv-list li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.lv-list li:last-child{border-bottom:0}.lv-list span{min-width:0;overflow-wrap:anywhere}.lv-list time,.lv-list b{color:var(--mut);white-space:nowrap;font-weight:400}
+.lv-list b.on{color:var(--acc)}.lv-list b.off{color:var(--warn)}
+.lv-more{margin-top:auto;padding-top:10px;font-size:13px}
+.lv-rates{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:15px}.lv-rates i{font-style:normal;color:var(--acc);margin-right:4px}
+.lv-rates small{font-size:11px;margin-left:4px}.lv-rates .up{color:var(--acc)}.lv-rates .dn{color:var(--bad)}
+.lv-src{font-size:11px;color:var(--mut);margin:6px 0 0}
+.lv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.lv-stats span{display:flex;flex-direction:column;font-size:11px;color:var(--mut)}.lv-stats b{font-size:18px;color:var(--txt)}
+.lv-matches{display:flex;gap:4px;margin-bottom:10px}.lv-matches a{flex:1;text-align:center;font-size:11px;font-weight:700;padding:4px 0;border-radius:4px;text-decoration:none}
+.lv-matches .w{background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}.lv-matches .l{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.lv-modal{position:fixed;inset:0;z-index:175;background:color-mix(in srgb,#000 60%,transparent);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px}
+.lv-modal[hidden]{display:none}.lv-form{width:min(460px,100%);display:grid;gap:10px}.lv-form label{display:grid;gap:4px;font-size:13px;color:var(--mut)}
+.lv-form input,.lv-form textarea{font:inherit;color:var(--txt);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;resize:vertical}
+.lv-form input:focus,.lv-form textarea:focus{outline:0;border-color:var(--acc)}
+.lv-fh{display:flex;justify-content:space-between;align-items:center}.lv-fh b{font-size:17px}.lv-x{background:none;border:0;color:var(--mut);font-size:22px;cursor:pointer;line-height:1}
+.lv-fa{display:flex;justify-content:space-between;align-items:center;gap:10px}.lv-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+
 .hud-entry{margin-top:16px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:30px;align-items:center;padding:22px 26px;border:1px solid color-mix(in srgb,#5fe6ff 30%,var(--line));border-radius:22px;background:radial-gradient(circle at 12% 50%,rgba(95,230,255,.13),transparent 45%),var(--card)}
 @media(max-width:640px){.hud-entry{grid-template-columns:minmax(0,1fr);justify-items:start;gap:18px}}
 .hud-orb{position:relative;width:150px;height:150px;border:0;padding:0;background:none;cursor:pointer;color:#5fe6ff;display:grid;place-items:center;font:inherit}
@@ -866,6 +891,12 @@ section{border-top-color:color-mix(in srgb,var(--line) 70%,transparent)}
 </div></div></section>
 <section id="hub"><div class="wrap"><div class="h2"><small>~/</small><span class="ttl">Куда пойдём?</span></div>
   <div class="hub"><a class="hub-card big" href="#fun" data-k="fun"><span class="hub-ic"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><path d="M17 20h.01M31 20h.01"/><path d="M16 29c2.5 4 13.5 4 16 0"/></svg></span><span class="hub-t">Для всех</span><span class="hub-d">Тест «Какой ты пользователь», фишинг или нет, проверка пароля. Понятно без всякого IT.</span><span class="hub-m">начни отсюда</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#games" data-k="games"><span class="hub-ic"><svg viewBox="0 0 48 48"><rect x="6" y="14" width="36" height="22" rx="10"/><path d="M15 21v8M11 25h8"/><path d="M31 23h.01M35 27h.01"/></svg></span><span class="hub-t">Игры</span><span class="hub-d">Кто положил сеть, змейка, сапёр, звонки на линию и смена в сервис-деске.</span><span class="hub-m">5 игр</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#sims" data-k="sims"><span class="hub-ic"><svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="36" rx="3"/><path d="M10 18h28M10 30h28"/><path d="M15 12h8M15 24h8M15 36h8"/><path d="M32 12h.01M32 24h.01M32 36h.01"/></svg></span><span class="hub-t">Симуляторы</span><span class="hub-d">Инцидент в 3 ночи, firewall, сборка сети, обжимка RJ45, серверная, сервер-тамагочи.</span><span class="hub-m">6 симуляторов</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#tools" data-k="tools"><span class="hub-ic"><svg viewBox="0 0 48 48"><path d="M29 8a9 9 0 0 0-8 13L8 34a3 3 0 0 0 4 4l13-13a9 9 0 0 0 13-8l-6 2-4-4 2-6z"/></svg></span><span class="hub-t">Тулзы</span><span class="hub-d">Подсети, пароли, DNS, cron, regex, diff, хэши, ИБП и PoE, проверка сайта, статус сервисов.</span><span class="hub-m" data-count="tools"># инструментов</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#gen" data-k="gen"><span class="hub-ic"><svg viewBox="0 0 48 48"><path d="M17 14 7 24l10 10M31 14l10 10-10 10M27 9l-6 30"/></svg></span><span class="hub-t">Генераторы</span><span class="hub-d">Конфиг MikroTik, скрипты PowerShell, инструкции для пользователей.</span><span class="hub-m" data-count="gen"># генератора</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#soft" data-k="soft"><span class="hub-ic"><svg viewBox="0 0 48 48"><path d="M6 15 24 6l18 9v18l-18 9-18-9z"/><path d="m6 15 18 9 18-9M24 24v18"/></svg></span><span class="hub-t">Софт</span><span class="hub-d">Полезные программы для админа с иконками и ссылками: удалёнка, сеть, VPN, диски, ЭДО.</span><span class="hub-m">стек автора внутри</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#blog" data-k="blog"><span class="hub-ic"><svg viewBox="0 0 48 48"><path d="M12 6h18l8 8v28H12z"/><path d="M30 6v8h8M17 22h14M17 29h14M17 36h9"/></svg></span><span class="hub-t">Блог</span><span class="hub-d">Реальные проекты с граблями и выводами, плюс заметки по MikroTik, AD, Zabbix и GLPI.</span><span class="hub-m" data-count="blog">заметки</span><span class="hub-arrow" aria-hidden="true">→</span></a><a class="hub-card" href="#me" data-k="me"><span class="hub-ic"><svg viewBox="0 0 48 48"><path d="M16 8h16v10a8 8 0 0 1-16 0z"/><path d="M16 11H9a7 7 0 0 0 7 9M32 11h7a7 7 0 0 1-7 9M24 26v8M17 40h14l-2-6H19z"/></svg></span><span class="hub-t">Профиль</span><span class="hub-d">Достижения за всё, что сделал на сайте, и гостевая книга.</span><span class="hub-m">ачивки</span><span class="hub-arrow" aria-hidden="true">→</span></a></div>
+</div></section>
+<section id="live"><div class="wrap"><div class="h2"><small>~/live</small><span class="ttl">Пульс сайта</span></div>
+  <p class="lead">Что обновилось на сайте, рабочий ли завтра день и курсы ЦБ. Обновляется само.</p>
+  <div class="live-grid"><article class="lv-card" id="lv-git"><div class="lv-h"><span class="lv-ic">⎇</span><b>Обновления сайта</b></div><p class="muted">Загружаю…</p></article>
+  <article class="lv-card" id="lv-day"><div class="lv-h"><span class="lv-ic">◷</span><b>Сегодня</b></div><p class="muted">Загружаю…</p></article>
+  <article class="lv-card" id="lv-dota" hidden></article><article class="lv-card" id="lv-tg" hidden></article></div>
 </div></section>
 <section id="term"><div class="wrap">
   <div class="h2"><small>~/terminal</small><span class="ttl">Терминал</span></div>
@@ -1392,5 +1423,6 @@ clearInterval(timer);timer=setInterval(()=>{$('#gt').textContent=--time;if(time<
 <script src="assets/ui.js"></script>
 <script src="assets/search.js"></script>
 <script src="assets/music.js"></script>
+<script src="assets/live.js"></script>
 </body>
 </html>

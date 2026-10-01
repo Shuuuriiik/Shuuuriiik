@@ -358,11 +358,14 @@ function tickTimers(){const now=Date.now();let ch=false;TM=TM.filter(t=>{if(t.en
   if(ch)saveTm();if(!TM.length&&!pomo){clearInterval(tmTick);tmTick=0}if(!HUD.hidden)drawDuty()}
 function ensureTick(){if(!tmTick&&(TM.length||pomo))tmTick=setInterval(tickTimers,1000)}
 function workEnd(){const[hh,mm]=String(store.get('nefor-hud-eod','18:00')).split(':').map(Number);return {hh,mm}}
-function untilEod(){const n=new Date(),{hh,mm}=workEnd(),e=new Date(n);e.setHours(hh,mm,0,0);const wd=n.getDay();if(wd===0||wd===6)return null;return e-n}
-function untilFri(){const n=new Date(),{hh,mm}=workEnd(),e=new Date(n),wd=n.getDay();if(wd===6||wd===0)return -1;e.setDate(n.getDate()+(5-wd));e.setHours(hh,mm,0,0);return e-n}
+const dayOff=d=>window.nfLive?window.nfLive.isOff(d):(d.getDay()===0||d.getDay()===6);const dayShort=d=>!!window.nfLive?.isShort(d);
+function endOf(d){const{hh,mm}=workEnd(),e=new Date(d);e.setHours(hh-(dayShort(d)?1:0),mm,0,0);return e}
+function untilEod(){const n=new Date();if(dayOff(n))return null;return endOf(n)-n}
+/* до выходных: конец последнего рабочего дня перед ближайшим нерабочим (с учётом праздников, если календарь загружен) */
+function untilFri(){const n=new Date();if(dayOff(n))return -1;const d=new Date(n);for(let i=0;i<20;i++){const nx=new Date(d);nx.setDate(nx.getDate()+1);if(dayOff(nx))return endOf(d)-n;d.setDate(d.getDate()+1)}return -1}
 function humanMs(ms){const m=Math.round(ms/60000),d=Math.floor(m/1440),hh=Math.floor(m%1440/60),mi=m%60;return [d&&`${d} ${plural(d,'день','дня','дней')}`,hh&&`${hh} ${plural(hh,'час','часа','часов')}`,!d&&mi&&`${mi} ${plural(mi,'минута','минуты','минут')}`].filter(Boolean).join(' ')||'меньше минуты'}
 function drawDuty(){const el=$h('#hd-duty');if(!el)return;const e=untilEod(),f=untilFri();
-  const L=[['До конца дня',e==null?'выходной':e<=0?'рабочий день окончен':humanMs(e)],['До пятницы',f<0?'уже выходные':f<=0?'пятница наступила':humanMs(f)]];
+  const L=[['До конца дня',e==null?'выходной':e<=0?'рабочий день окончен':humanMs(e)],['До выходных',f<0?'уже выходные':f<=0?'выходные наступили':humanMs(f)]];
   el.innerHTML=L.map(([k,v])=>`<div class="hd-row"><span>${k}</span><b>${h(v)}</b></div>`).join('')+
    (pomo?`<div class="hd-tm pomo"><span>Помодоро #${pomo.n+(pomo.phase==='work'?1:0)} · ${pomo.phase==='work'?'работа':'перерыв'}</span><b>${fmtLeft(pomo.end-Date.now())}</b><button type="button" data-pomo-x aria-label="Остановить помодоро">×</button></div>`:'')+
    TM.map(t=>`<div class="hd-tm"><span>${h(t.label||'Таймер')}</span><b>${fmtLeft(t.end-Date.now())}</b><button type="button" data-tm-x="${t.id}" aria-label="Отменить">×</button></div>`).join('')+
@@ -382,7 +385,7 @@ function timerCmd(raw,q){
   addTimer(dd.s,label);return reply(label?`Напомню через ${fmtDur(dd.s)}: «${label}».`:`Таймер на ${fmtDur(dd.s)} запущен.`),true}
 function dutyCmd(q){
   const m=/рабоч\S* день (?:до|заканчивается в|кончается в) (\d{1,2})(?:[:.\s](\d{2}))?/.exec(q);if(m){store.set('nefor-hud-eod',`${m[1]}:${m[2]||'00'}`);drawDuty();return reply(`Запомнил: рабочий день до ${m[1]}:${m[2]||'00'}.`),true}
-  if(/до (пятниц|выходн)/.test(q)){const f=untilFri();return reply(f<0?'Так ведь уже выходные. Закройте ноутбук.':f<=0?'Пятница вечер уже наступила. Не открывайте почту.':`До пятницы ${workEnd().hh}:${String(workEnd().mm).padStart(2,'0')} осталось ${humanMs(f)}.`),true}
+  if(/до (пятниц|выходн)/.test(q)){const f=untilFri();return reply(f<0?'Так ведь уже выходные. Закройте ноутбук.':f<=0?'Пятница вечер уже наступила. Не открывайте почту.':`До выходных осталось ${humanMs(f)}.`),true}
   if(/до конца (рабоч|дня|смены)|когда домой|скоро домой/.test(q)){const e=untilEod();return reply(e==null?'Сегодня выходной. Какой ещё рабочий день?':e<=0?'Рабочий день уже закончился. Почему вы ещё здесь?':`До конца рабочего дня ${humanMs(e)}.`),true}
   if(/до нового года/.test(q)){const n=new Date(),y=new Date(n.getFullYear()+1,0,1);return reply(`До Нового года ${Math.ceil((y-n)/864e5)} ${plural(Math.ceil((y-n)/864e5),'день','дня','дней')}. Успейте закрыть все заявки.`),true}
   if(/до (отпуск|зарплат|аванс)/.test(q))return reply(/отпуск/.test(q)?'Отпуск в календаре не найден. Подайте заявку в отдел кадров и ждите согласования.':'Слишком долго. Точнее сказать не могу, бухгалтерия не даёт доступ к API.'),true;
@@ -426,8 +429,8 @@ function fun(raw,q){if(/монетк|орел или решк|орёл или р
   return false}
 function helpCard(){const G=[['Сайт',['открой игры','покажи кейсы','включи компьютер','паника']],['Утилиты',['подсеть 192.168.1.0/26','мой IP','dns mx ya.ru','что за порт 3389','объясни cron */15 9-18 * * 1-5','base64 привет','md5 test','uuid','chmod 755','unix 1700000000','сколько качать 50 гб на 100 мбит']],
   ['Справочник',['ошибка 0x80070005','ошибка 1219','код 502','event 4740','как разблокировать пользователя','как пробросить порт на микротике','как очистить очередь печати']],
-  ['Дежурство',['таймер на 5 минут','напомни через 10 минут проверить бэкап','помодоро','сколько до пятницы','до конца рабочего дня','погода в Москве']],
-  ['Характер и игры',['режим ворчуна','режим шамана','вежливый режим','смени голос','меня зовут Саша','викторина','угадай порт','кинь кубик','выбери пицца или суши']],['Система',['диагностика','статус','пинг','сгенерируй пароль','расскажи байку','отмазка']],['Музыка',['включи музыку','следующий трек','что играет','громче','пауза']]];
+  ['Дежурство',['таймер на 5 минут','напомни через 10 минут проверить бэкап','помодоро','сколько до выходных','до конца рабочего дня','погода в Москве']],
+  ['Характер и игры',['режим ворчуна','режим шамана','вежливый режим','смени голос','меня зовут Саша','викторина','угадай порт','кинь кубик','выбери пицца или суши']],['Система',['диагностика','статус','пинг','сгенерируй пароль','расскажи байку','отмазка']],['Музыка',['включи музыку','следующий трек','что играет','громче','пауза']],['Интеграции',['курс доллара','100 долларов в рублях','завтра рабочий день?','ближайший праздник','что нового на сайте','как я сыграл в доту','написать админу']]];
   return `<div class="hd-help">${G.map(([t,l])=>`<b>${t}</b><div>${l.map(chip).join('')}</div>`).join('')}</div>`}
 
 async function handle(raw){raw=String(raw||'').trim();const q=norm(raw);if(!q)return;userLine(raw);await kbReady;
@@ -478,6 +481,21 @@ async function handle(raw){raw=String(raw||'').trim();const q=norm(raw);if(!q)re
   if(has(/тем[ау] сайта|смени тему|цвет сайта/)){document.getElementById('themeBtn')?.click();return reply('Тема сайта переключена. Мне идёт голубой, я останусь в нём.')}
   if(has(/который час|сколько времени|^время$/)){const d=new Date();return reply(`Сейчас ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}.`)}
   if(has(/какое (сегодня )?число|^дата|какой (сегодня )?день/))return reply('Сегодня '+new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})+'.');
+  const LV=window.nfLive;
+  if(LV&&has(/курс|доллар|евро|юан|тенге|валют|бакс/)){try{const r=await LV.rates(),K={доллар:'USD',бакс:'USD',usd:'USD',евро:'EUR',eur:'EUR',юан:'CNY',cny:'CNY',тенге:'KZT',фунт:'GBP',лир:'TRY',иен:'JPY',дирхам:'AED',белорус:'BYN'};
+    const m=/(\d+(?:[.,]\d+)?)\s*(доллар|бакс|usd|евро|eur|юан|cny|тенге|фунт|лир|иен|дирхам|белорус)/.exec(ql);if(m){const c=K[m[2]],x=r.v[c];if(x){const n=parseFloat(m[1].replace(',','.'));return reply(`${m[1]} ${c} = ${LV.rub(n*x.v/x.n)} ₽ по курсу ЦБ.`)}}
+    const want=Object.entries(K).filter(([w])=>q.includes(w)).map(([,c])=>c);const list=[...new Set(want.length?want:['USD','EUR','CNY'])].filter(c=>r.v[c]);
+    return reply(`Курс ЦБ на ${new Date(r.date).toLocaleDateString('ru-RU')}: `+list.map(c=>{const x=r.v[c],d=(x.v-x.prev)/x.n;return `${x.name}: ${LV.rub(x.v/x.n)} ₽ (${d>=0?'+':'−'}${LV.rub(Math.abs(d))})`}).join('; ')+'.')}catch(e){return reply('ЦБ сейчас не ответил. Попробуйте позже.')}}
+  if(LV&&has(/(завтра|сегодня|послезавтра)\S* (рабоч|выходн|праздн)|(рабоч|выходн)\S* ли (завтра|сегодня)|ближайш\S* (праздник|выходн)|рабочих дней|производствен|праздник/)){await LV.cal().catch(()=>{});
+    if(has(/ближайш\S* (праздник|выходн)|праздник/)&&!has(/завтра|сегодня|послезавтра/)){const nh=LV.nextHoliday();return reply(nh?`Ближайший праздничный выходной: ${nh.date.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})}, ${nh.name}.`:'Не нашёл праздников в календаре.')}
+    if(has(/рабочих дней/))return reply(`В этом месяце ${LV.workDaysInMonth()} ${plural(LV.workDaysInMonth(),'рабочий день','рабочих дня','рабочих дней')}.`);
+    const d=new Date();if(has(/послезавтра/))d.setDate(d.getDate()+2);else if(has(/завтра/))d.setDate(d.getDate()+1);const w=has(/послезавтра/)?'Послезавтра':has(/завтра/)?'Завтра':'Сегодня';
+    return reply(LV.isOff(d)?`${w} выходной. ${persona==='grumpy'?'Не вздумайте проверять почту.':'Отдыхайте.'}`:LV.isShort(d)?`${w} сокращённый рабочий день, на час короче.`:`${w} рабочий день.`)}
+  if(LV&&has(/дот[аеу]|dota|как я (сыграл|играю)|последн\S* (игр|матч)|винрейт|ммр|мой ранг/)){try{const d=await LV.dota(),n=d.wl.win+d.wl.lose,r=d.recent[0];
+    return reply(`${d.name}: ${LV.medal(d.rank)}, ${n} матчей, ${n?Math.round(d.wl.win/n*100):0}% побед.${r?` Последняя игра: ${r.hero}, ${r.k}/${r.d}/${r.a}, ${r.win?'победа':'поражение'}.`:''}${r&&!r.win&&persona==='shaman'?' Духи были против.':''}`)}catch(e){return reply('Dota-профиль не подключён. Владелец сайта должен указать Steam ID в настройках.')}}
+  if(LV&&has(/что нового|обновлени\S* (на )?сайт|последн\S* обновлени|история изменений|git log/)){try{const s=await LV.site(),L=(s.commits||[]).slice(0,3);if(!L.length)throw 0;
+    return reply(`Последнее обновление ${LV.ago(L[0].date)}: ${L.map(x=>LV.prettyCommit(x)).join('; ')}.`)}catch(e){return reply('GitHub сейчас не ответил.')}}
+  if(LV&&has(/(написать|написать сообщение|связаться|связь|контакт\S*)\s*(с\s*)?(админ|автор|владел)|телеграм|telegram/))return go(()=>LV.contact(),'Открываю связь с админом.');
   if(has(/(без|выключи|убери) (звук|голос)|замолчи|тише|молчи/)){voiceOn=false;store.set('nefor-hud-voice',false);setVoiceBtn();synth?.cancel();return say('Перехожу в текстовый режим.')}
   if(has(/(включи|верни) (звук|голос)|говори/)){voiceOn=true;store.set('nefor-hud-voice',true);setVoiceBtn();return say(voice?'Голосовой модуль активен.':'Хотел бы, но в вашем браузере нет русского голоса.')}
   if(has(/кто ты|как тебя зовут|что ты такое|представься|нефор|расшифр/))return reply('Я НЕФОР: Нейронный Ежедневный Фронт Обслуживания Рабочих. Ассистент этого сайта: считаю подсети, знаю коды ошибок, ставлю таймеры и иногда ворчу.');
