@@ -12,7 +12,7 @@ function tone(freq=880,dur=.08,type='square',vol=.04){if(!soundOn)return;const a
 function click(){if(!soundOn)return;const a=ac();if(!a)return;const len=Math.floor(a.sampleRate*.015),b=a.createBuffer(1,len,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();f.type='highpass';f.frequency.value=1800+Math.random()*900;g.gain.value=.25;s.buffer=b;s.connect(f).connect(g).connect(a.destination);s.start()}
 const chime=()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.18,'triangle',.06),i*110))};
 const postBeep=()=>tone(1000,.25,'square',.05);
-function setSound(on){soundOn=on;store.set('nefor-sound',on);const b=$('#soundBtn');b.textContent='звук: '+(on?'вкл':'выкл');b.setAttribute('aria-pressed',on);if(on){ac();tone(660,.06)}else humStop()}
+function setSound(on){soundOn=on;store.set('nefor-sound',on);const b=$('#soundBtn');b.textContent='звук';b.title='Звук '+(on?'включён':'выключен');b.setAttribute('aria-pressed',on);if(on){ac();tone(660,.06)}else humStop()}
 $('#soundBtn').onclick=()=>setSound(!soundOn);setSound(soundOn);
 $('#cmd').addEventListener('keydown',click);
 
@@ -29,7 +29,7 @@ $('#humBtn').onclick=()=>{if(hum){humStop();return}if(!soundOn)setSound(true);hu
 /* ================= ТЕМЫ ================= */
 const THEMES=[['','зелёная'],['t-amber','янтарь'],['t-ice','лёд'],['t-light','офис']];
 let ti=Math.max(0,THEMES.findIndex(t=>t[0]===store.get('nefor-theme','')));
-function applyTheme(i){THEMES.forEach(t=>t[0]&&document.body.classList.remove(t[0]));ti=(i+THEMES.length)%THEMES.length;if(THEMES[ti][0])document.body.classList.add(THEMES[ti][0]);store.set('nefor-theme',THEMES[ti][0]);$('#themeBtn').textContent='тема: '+THEMES[ti][1];rackDraw&&rackDraw();unDraw&&unDraw()}
+function applyTheme(i){THEMES.forEach(t=>t[0]&&document.body.classList.remove(t[0]));ti=(i+THEMES.length)%THEMES.length;if(THEMES[ti][0])document.body.classList.add(THEMES[ti][0]);store.set('nefor-theme',THEMES[ti][0]);$('#themeBtn').textContent='тема';$('#themeBtn').title='Тема: '+THEMES[ti][1]+'. Нажми, чтобы сменить';rackDraw&&rackDraw();unDraw&&unDraw()}
 $('#themeBtn').onclick=()=>{applyTheme(ti+1);window.ach?.('theme');tone(440+ti*110,.05)};
 
 /* ================= КОНФИГУРАТОР MIKROTIK ================= */
@@ -306,7 +306,7 @@ function diffRun(){const ws=$('#dfws').checked,A=$('#dfa').value.split('\n'),B=$
 const JOPS={fmt:s=>JSON.stringify(JSON.parse(s),null,2),min:s=>JSON.stringify(JSON.parse(s)),
   toyaml:s=>{if(typeof jsyaml==='undefined')throw new Error('js-yaml не загрузился');return jsyaml.dump(JSON.parse(s),{lineWidth:120})},
   tojson:s=>{if(typeof jsyaml==='undefined')throw new Error('js-yaml не загрузился');return JSON.stringify(jsyaml.load(s),null,2)}};
-document.querySelectorAll('#p-json .chip').forEach(b=>b.onclick=()=>{const o=$('#jout');try{o.textContent=JOPS[b.dataset.j]($('#jin').value);o.style.color=''}catch(e){const m=String(e.message).match(/position (\d+)/);let msg='Ошибка: '+e.message;if(m){const s=$('#jin').value,p=+m[1],ln=s.slice(0,p).split('\n').length;msg+=` (строка ${ln})`}o.textContent=msg;o.style.color='var(--bad)'}});
+document.querySelectorAll('#p-json .chip').forEach(b=>b.onclick=()=>{if(/yaml/.test(b.dataset.j)&&typeof jsyaml==='undefined'){need('js-yaml').then(()=>b.click());return}const o=$('#jout');try{o.textContent=JOPS[b.dataset.j]($('#jin').value);o.style.color=''}catch(e){const m=String(e.message).match(/position (\d+)/);let msg='Ошибка: '+e.message;if(m){const s=$('#jin').value,p=+m[1],ln=s.slice(0,p).split('\n').length;msg+=` (строка ${ln})`}o.textContent=msg;o.style.color='var(--bad)'}});
 $('#jout').onclick=()=>copy($('#jout').textContent);
 document.querySelector('#p-json [data-j="fmt"]').click();
 

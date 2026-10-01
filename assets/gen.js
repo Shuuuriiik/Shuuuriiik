@@ -252,7 +252,7 @@ const GD={
 };
 let gdK='vpn';const gdV={common:{company:'ООО «Ромашка»',support:'IT, доб. 305, it@example.ru'}};
 Object.entries(GD).forEach(([k,t])=>{gdV[k]={};t.f.forEach(f=>gdV[k][f[0]]=Array.isArray(f[2])?f[2][0]:f[2])});
-function qrImg(text,dark='#000'){if(typeof qrcode==='undefined')return'';const q=qrcode(0,'M');q.addData(text);q.make();const n=q.getModuleCount(),c=document.createElement('canvas'),s=6,p=4*s;c.width=c.height=n*s+p*2;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle=dark;for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(p+k*s,p+r*s,s,s);return c.toDataURL('image/png')}
+function qrImg(text,dark='#000'){if(typeof qrcode==='undefined'){need('qrcode').then(()=>{const p=$('#gd-prev');if(p)p.innerHTML=guideHTML(gdK,{...gdV.common,...gdV[gdK]});if(/^#guide=wifi/.test(location.hash))guideRoute()}).catch(()=>{});return''}const q=qrcode(0,'M');q.addData(text);q.make();const n=q.getModuleCount(),c=document.createElement('canvas'),s=6,p=4*s;c.width=c.height=n*s+p*2;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle=dark;for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(p+k*s,p+r*s,s,s);return c.toDataURL('image/png')}
 function guideHTML(k,v){const g=GD[k].b(v);
   return `<article class="guide"><div class="guide-co">${h(v.company)}</div><h2>${h(GD[k].t)}</h2><p class="guide-intro">${h(g.intro)}</p>
    ${g.qr?`<img class="guide-qr" src="${qrImg(g.qr)}" alt="QR-код для подключения к Wi-Fi">`:''}

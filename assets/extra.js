@@ -88,7 +88,7 @@ $('#b64out').onclick=()=>copy($('#b64out').textContent);
 let qrObj=null;
 const wesc=s=>s.replace(/([\\;,:"])/g,'\\$1');
 function wifiQR(){
-  if(typeof qrcode==='undefined'){$('#qr').textContent='QR-библиотека не загрузилась';return}
+  if(typeof qrcode==='undefined'){need('qrcode').then(wifiQR).catch(()=>{$('#qr').textContent='QR-библиотека не загрузилась'});return}
   const ssid=$('#wssid').value,pass=$('#wpass').value,sec=$('#wsec').value,hid=$('#whid').checked;
   const str=`WIFI:T:${sec};S:${wesc(ssid)};${sec!=='nopass'?'P:'+wesc(pass)+';':''}${hid?'H:true;':''};`;
   qrcode.stringToBytes=qrcode.stringToBytesFuncs['UTF-8'];
@@ -106,7 +106,7 @@ $('#wdl').onclick=()=>{if(!qrObj)return;const n=qrObj.getModuleCount(),cell=16,p
   x.font='bold 30px sans-serif';x.textAlign='center';x.fillText('Wi-Fi: '+$('#wssid').value,W/2,W+20);
   x.font='22px sans-serif';x.fillStyle='#555';x.fillText('Наведи камеру телефона',W/2,W+60);
   const a=document.createElement('a');a.download=`wifi-${$('#wssid').value||'qr'}.png`;a.href=cv.toDataURL('image/png');a.click()};
-window.addEventListener('load',wifiQR);
+document.querySelector('#tabs .tab[data-p=wifi]')?.addEventListener('click',wifiQR);
 
 /* ============ АРКАДА ============ */
 document.querySelectorAll('#atabs .tab').forEach(t=>t.onclick=()=>{
@@ -246,16 +246,32 @@ async function blogInit(){
   $('#btags').innerHTML=tags.map(t=>`<button class="tab${t===tag?' on':''}" data-t="${h(t)}">${h(t)}</button>`).join('');
   document.querySelectorAll('#btags .tab').forEach(b=>b.onclick=()=>{tag=b.dataset.t;document.querySelectorAll('#btags .tab').forEach(x=>x.classList.toggle('on',x===b));blogList()});
   blogList();route()}
-function blogList(){const list=POSTS.filter(p=>tag==='все'||p.tags.includes(tag));
-  $('#posts').innerHTML=list.map(p=>`<button class="post" data-s="${h(p.slug)}"><div class="d">${new Date(p.date).toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})} · ${p.min||3} мин</div><h3>${h(p.title)}</h3><p>${h(p.desc)}</p><div class="tg">${p.tags.map(t=>`<span>#${h(t)}</span>`).join('')}</div></button>`).join('');
-  document.querySelectorAll('.post').forEach(b=>b.onclick=()=>location.hash='post/'+b.dataset.s)}
+const fmtD=d=>new Date(d).toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'});
+function caseCard(p){return `<button class="case" data-s="${h(p.slug)}"><span class="case-stat">${h(p.stat||'кейс')}</span><h3>${h(p.title.replace(/^Кейс:\s*/,''))}</h3><p>${h(p.desc)}</p><span class="case-stack">${(p.stack||[]).map(x=>`<em>${h(x)}</em>`).join('')}</span></button>`}
+function postCard(p){return `<button class="post" data-s="${h(p.slug)}"><div class="d">${fmtD(p.date)} · ${p.min||3} мин${p.case?' · <b class="case-b">кейс</b>':''}</div><h3>${h(p.title)}</h3><p>${h(p.desc)}</p><div class="tg">${p.tags.map(t=>`<span>#${h(t)}</span>`).join('')}</div></button>`}
+function blogList(){const list=POSTS.filter(p=>tag==='все'||p.tags.includes(tag)),cases=list.filter(p=>p.case),notes=list.filter(p=>!p.case);
+  $('#posts').innerHTML=(tag==='все'||tag==='кейс')&&cases.length?`<div class="cases-h"><b>Реальные проекты</b><span class="muted">что делал руками, с граблями и выводами</span></div><div class="cases">${cases.map(caseCard).join('')}</div>${tag==='все'&&notes.length?'<div class="cases-h"><b>Заметки</b><span class="muted">шпаргалки и разборы</span></div>':''}<div class="posts-in">${(tag==='все'?notes:[]).map(postCard).join('')}</div>`
+    :`<div class="posts-in">${list.map(postCard).join('')}</div>`;
+  document.querySelectorAll('#posts [data-s]').forEach(b=>b.onclick=()=>location.hash='post/'+b.dataset.s)}
 async function openPost(slug){const p=POSTS.find(x=>x.slug===slug);if(!p)return;window.achSet?.('blog',slug,3,'reader');
-  $('#reader').hidden=false;document.body.style.overflow='hidden';$('#rbody').innerHTML='<p style="color:var(--mut)">Загружаю…</p>';
+  const R=$('#reader');R.hidden=false;R.scrollTop=0;document.body.style.overflow='hidden';$('#rbody').innerHTML='<p style="color:var(--mut)">Загружаю…</p>';
   try{const md=await (await fetch(`posts/${slug}.md`,{cache:'no-cache'})).text();
-    const html=typeof marked!=='undefined'?marked.parse(md):'<pre>'+h(md)+'</pre>';
-    $('#rbody').innerHTML=html.replace(/<\/h1>/,`</h1><div class="meta">${new Date(p.date).toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})} · ${p.tags.map(t=>'#'+h(t)).join(' ')}</div>`);
-    $('#rbody').querySelectorAll('pre').forEach(pre=>{const b=document.createElement('button');b.className='cpy';b.textContent='copy';b.onclick=()=>copy(pre.querySelector('code')?.innerText||pre.innerText);pre.append(b)});
-    document.title=p.title+' — ne-for.ru'}catch(e){$('#rbody').innerHTML='<p style="color:var(--bad)">Не загрузилось.</p>'}}
+    await need('marked').catch(()=>{});const html=typeof marked!=='undefined'?marked.parse(md):'<pre>'+h(md)+'</pre>';
+    const url=location.origin+location.pathname+'#post/'+slug;
+    const share=`<div class="share"><button class="chip" data-share="copy">Скопировать ссылку</button><a class="chip" href="https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(p.title)}" target="_blank" rel="noopener">Поделиться в Telegram</a></div>`;
+    $('#rbody').innerHTML=html.replace(/<\/h1>/,`</h1><div class="meta">${fmtD(p.date)} · ${p.min||3} мин · ${p.tags.map(t=>'#'+h(t)).join(' ')}</div>`);
+    const body=$('#rbody'),hs=[...body.querySelectorAll('h2')];
+    hs.forEach((x,i)=>x.id='sec-'+i);
+    if(hs.length>=3){const toc=document.createElement('nav');toc.className='toc';toc.innerHTML='<b>Содержание</b><ol>'+hs.map((x,i)=>`<li><button data-to="sec-${i}">${h(x.textContent)}</button></li>`).join('')+'</ol>';
+      (body.querySelector('.meta')||body.firstChild).after(toc)}
+    body.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.to)?.scrollIntoView({behavior:'smooth',block:'start'}));
+    body.querySelectorAll('pre').forEach(pre=>{const b=document.createElement('button');b.className='cpy';b.textContent='copy';b.onclick=()=>copy(pre.querySelector('code')?.innerText||pre.innerText);pre.append(b)});
+    const rel=POSTS.filter(x=>x.slug!==slug).map(x=>[x.tags.filter(t=>p.tags.includes(t)).length+(x.case&&p.case?1:0),x]).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1]);
+    body.insertAdjacentHTML('beforeend',share+(rel.length?`<div class="related"><b>Похожие заметки</b><div class="related-in">${rel.map(x=>`<a href="#post/${h(x.slug)}"><span>${x.case?'кейс':fmtD(x.date)}</span>${h(x.title)}</a>`).join('')}</div></div>`:''));
+    body.querySelector('[data-share=copy]').onclick=()=>copy(url);
+    document.title=p.title+' — ne-for.ru';rprog()}catch(e){$('#rbody').innerHTML='<p style="color:var(--bad)">Не загрузилось.</p>'}}
+function rprog(){const R=$('#reader'),bar=$('#rprog');if(!bar)return;const max=R.scrollHeight-R.clientHeight;bar.style.width=(max>0?R.scrollTop/max*100:0)+'%'}
+$('#reader').addEventListener('scroll',rprog,{passive:true});
 function closePost(){$('#reader').hidden=true;document.body.style.overflow='';document.title='ne-for.ru — не для всех';if(location.hash.startsWith('#post/'))history.replaceState(null,'','#blog')}
 function route(){const m=location.hash.match(/^#post\/(.+)$/);if(m)openPost(decodeURIComponent(m[1]));else if(!$('#reader').hidden&&!location.hash.startsWith('#guide='))closePost()}
 addEventListener('hashchange',route);$('#rclose').onclick=closePost;$('#reader').onclick=e=>{if(e.target.id==='reader')closePost()};

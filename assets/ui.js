@@ -4,10 +4,12 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fine = matchMedia('(pointer: fine)').matches;
 
 /* ================= РАЗДЕЛЫ ================= */
-const VIEWS={home:'Главная',fun:'Для всех',games:'Игры',sims:'Симуляторы',tools:'Тулзы',gen:'Генераторы',blog:'Блог',me:'Профиль'};
+const VIEWS={home:'Главная',fun:'Для всех',games:'Игры',sims:'Симуляторы',tools:'Тулзы',gen:'Генераторы',soft:'Софт',blog:'Блог',me:'Профиль'};
 const viewOf=id=>{const el=document.getElementById(id);return el?.closest('.view')?.id.slice(2)};
 let cur=null,vt=null;
-function show(v,target){
+const MOD={games:['desk'],sims:['sims','crimp'],tools:['gen'],gen:['gen'],soft:['soft']};
+const loadView=v=>(MOD[v]||[]).reduce((p,n)=>p.then(()=>need(n)).catch(()=>{}),Promise.resolve());
+async function show(v,target){await loadView(v);
   const swap=()=>{document.querySelectorAll('.view').forEach(x=>x.hidden=x.id!=='v-'+v);cur=v;
     document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('on',a.dataset.nav===v));navBar();
     document.title=v==='home'?'ne-for.ru — не для всех':`${VIEWS[v]} · ne-for.ru`;
@@ -80,7 +82,13 @@ if(!reduce)document.querySelectorAll('.stat b').forEach(b=>{const t=b.textConten
 
 /* счётчики карточек разделов */
 const cnt={games:document.querySelectorAll('#v-games .tab, #game').length,tools:document.querySelectorAll('#tabs .tab').length,sims:document.querySelectorAll('#stabs .tab').length,gen:document.querySelectorAll('#gtabs .tab').length};
-document.querySelectorAll('[data-count]').forEach(e=>{const k=e.dataset.count;if(k==='blog')fetch('posts/index.json').then(r=>r.json()).then(l=>e.textContent=l.length+' заметок').catch(()=>{});else if(cnt[k])e.textContent=e.textContent.replace('#',cnt[k])});
+document.querySelectorAll('[data-count]').forEach(e=>{const k=e.dataset.count;if(k==='blog')fetch('posts/index.json').then(r=>r.json()).then(l=>e.textContent=`${l.filter(x=>x.case).length} кейсов и ${l.filter(x=>!x.case).length} заметок`).catch(()=>{});else if(cnt[k])e.textContent=e.textContent.replace('#',cnt[k])});
 
+window.nfShow=show;
+document.addEventListener('click',e=>{const d=e.target.closest('[data-hud]');if(d){e.preventDefault();need('hud').then(()=>window.hudOn?.(d.dataset.hud))}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-os]');if(!b)return;e.preventDefault();need('os').then(()=>window.osPower?.(b.dataset.os))});
 route();
+/* после загрузки главной тихо догружаем остальное */
+const idle=window.requestIdleCallback||(f=>setTimeout(f,1200));
+addEventListener('load',()=>idle(()=>['soft','desk','sims','crimp','gen','os','hud'].reduce((p,n)=>p.then(()=>need(n)).catch(()=>{}),Promise.resolve()),{timeout:3000}));
 })();
