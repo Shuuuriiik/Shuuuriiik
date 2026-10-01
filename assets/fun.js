@@ -123,7 +123,7 @@ pw.oninput=pwRun;$('#pw-show').onclick=()=>{pw.type=pw.type==='password'?'text':
 
 /* ================= ПАНИКА ================= */
 const PN=$('#panic');
-function panicOn(){if(!PN.hidden)return;ach('panic');const cols='ABCDEFGHI',rows=28,names=['Регион','Январь','Февраль','Март','Апрель','Май','Июнь','Итого','Δ %'],reg=['Москва','Санкт-Петербург','Казань','Новосибирск','Екатеринбург','Самара','Псков','Великие Луки','Тверь','Смоленск'];
+function panicOn(){if(!PN.hidden)return;ach('panic');window.nfMusic?.pause();const cols='ABCDEFGHI',rows=28,names=['Регион','Январь','Февраль','Март','Апрель','Май','Июнь','Итого','Δ %'],reg=['Москва','Санкт-Петербург','Казань','Новосибирск','Екатеринбург','Самара','Псков','Великие Луки','Тверь','Смоленск'];
   let row=[];let t='<table><thead><tr><th></th>'+[...cols].map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
   for(let r=1;r<=rows;r++){t+=`<tr><th>${r}</th>`;for(let c=0;c<cols.length;c++){let v='';if(r===1)v=names[c];else if(r-2<reg.length){if(c===0){v=reg[r-2];row=[]}else if(c<7){const n=Math.random()*900+100;row.push(n);v=n.toFixed(1).replace('.',',')}else if(c===7)v=row.reduce((a,b)=>a+b,0).toFixed(1).replace('.',',');else v=(Math.random()*30-10).toFixed(1).replace('.',',')+'%'}
     t+=`<td class="${r===1?'hd':''}${c>0&&r>1?' n':''}${r===3&&c===7?' sel':''}">${v}</td>`}t+='</tr>'}

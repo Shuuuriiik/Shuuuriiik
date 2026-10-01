@@ -18,6 +18,13 @@ const css=`
 #hud .hd-bg{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
 #hud .hd-sweep{position:fixed;left:0;right:0;height:140px;top:-140px;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(95,230,255,.06) 80%,rgba(95,230,255,.18));animation:hdSweep 7s linear infinite}
 @keyframes hdSweep{to{top:100%}}
+#hud.shaman{--h:#9dff57;--h2:#b04dff;--hd:rgba(157,255,87,.12);--hl:rgba(157,255,87,.3);background:radial-gradient(ellipse at 50% 42%,#21103a 0%,#0c0716 55%,#040208 100%)}
+#hud.shaman #hdG stop:first-child{stop-color:#9dff57}#hud.shaman #hdG stop:nth-child(2){stop-color:#b04dff}#hud.shaman #hdR stop{stop-color:#9dff57}
+#hud.shaman .hd-sweep{background:linear-gradient(180deg,transparent,rgba(176,77,255,.07) 80%,rgba(157,255,87,.16))}
+#hud.shaman .hd-core .nm b{text-shadow:0 0 18px #9dff57,0 0 40px #b04dff}
+#hud.shaman.ready .hd-core .r2{animation-duration:6s}#hud.shaman.ready .hd-core .r4{animation-duration:3.5s}
+#hud.shaman .hd-core.talk{animation:hdShake .18s linear infinite}@keyframes hdShake{50%{transform:translate(1px,-1px) rotate(.3deg)}}
+@media(prefers-reduced-motion:reduce){#hud.shaman .hd-core.talk{animation:none}}
 #hud .hd-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px max(16px,3vw);border-bottom:1px solid var(--hl);background:rgba(1,8,14,.72);backdrop-filter:blur(8px)}
 #hud .hd-brand{font-weight:700;letter-spacing:.32em;color:var(--h);text-shadow:0 0 12px var(--h)}
 #hud .hd-sub{color:#6fa7bf;font-size:12px}
@@ -45,7 +52,7 @@ const css=`
 #hud .hd-spark small b{color:var(--h);font-weight:600}
 #hud .hd-spark canvas{display:block;width:100%;height:46px;margin-top:6px}
 #hud .hd-mid{display:flex;flex-direction:column;align-items:center;gap:14px;min-width:0}
-#hud .hd-core{position:relative;width:min(400px,86vw);aspect-ratio:1;cursor:pointer;border:0;background:none;padding:0;color:inherit}
+#hud .hd-core{color:var(--h);position:relative;width:min(400px,86vw);aspect-ratio:1;cursor:pointer;border:0;background:none;padding:0;color:var(--h)}
 #hud .hd-core svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 #hud .hd-core .r{transform-origin:200px 200px;transform-box:view-box}
 #hud.ready .hd-core .r1{animation:hdSpin 26s linear infinite}#hud.ready .hd-core .r2{animation:hdSpin 14s linear infinite reverse}
@@ -124,7 +131,7 @@ function arc(r,a0,a1){const p=a=>[200+Math.cos(a*Math.PI/180)*r,200+Math.sin(a*M
 const CORE=`<svg viewBox="0 0 400 400" aria-hidden="true"><defs>
  <radialGradient id="hdG"><stop offset="0" stop-color="#5fe6ff" stop-opacity=".55"/><stop offset=".55" stop-color="#2a8cff" stop-opacity=".12"/><stop offset="1" stop-color="#2a8cff" stop-opacity="0"/></radialGradient>
  <linearGradient id="hdR" x1="0" x2="1"><stop offset="0" stop-color="#5fe6ff" stop-opacity="0"/><stop offset="1" stop-color="#5fe6ff" stop-opacity=".5"/></linearGradient></defs>
- <g class="boot" fill="none" stroke="#5fe6ff">
+ <g class="boot" fill="none" stroke="currentColor">
   <circle class="glow" cx="200" cy="200" r="120" fill="url(#hdG)" stroke="none" opacity=".6"/>
   <g class="r r3" opacity=".35">${ticks(196,120,5,1)}</g>
   <g class="r r1"><circle cx="200" cy="200" r="178" stroke-opacity=".25"/><path d="${arc(178,-60,40)}" stroke-width="3"/><path d="${arc(178,120,150)}" stroke-width="3"/><path d="${arc(178,200,262)}" stroke-width="1.5" stroke-dasharray="2 5"/></g>
@@ -205,15 +212,17 @@ function bg(){const cv=$h('#hd-bg'),r=devicePixelRatio||1,w=innerWidth,ht=innerH
 /* ---------- голос ---------- */
 let voiceOn=store.get('nefor-hud-voice',true),voice=null;
 const synth=window.speechSynthesis;
-function pickVoice(){if(!synth)return;const v=synth.getVoices().filter(x=>/^ru/i.test(x.lang));voice=v.find(x=>/Google/i.test(x.name))||v.find(x=>/Dmitry|Pavel|Microsoft/i.test(x.name))||v[0]||null}
+const ruVoices=()=>synth?synth.getVoices().filter(x=>/^ru/i.test(x.lang)):[];const MALE=/Dmitry|Pavel|Maxim|Yuri|Дмитрий|Павел|Максим|male|мужск/i;
+function pickVoice(){if(!synth)return;const v=ruVoices(),saved=store.get('nefor-hud-vname','');voice=(saved&&v.find(x=>x.name===saved))||v.find(x=>/Google/i.test(x.name))||v.find(x=>/Dmitry|Pavel|Microsoft/i.test(x.name))||v[0]||null}
 if(synth){pickVoice();synth.onvoiceschanged=pickVoice}
 function setVoiceBtn(){voiceB.textContent='голос: '+(voiceOn?'вкл':'выкл');voiceB.setAttribute('aria-pressed',voiceOn)}
 let sayTok=0;
 function say(text,extra,spoken){const tok=++sayTok;sayEl.textContent='';const lp=document.createElement('p');lp.className='a';lp.textContent=text;if(extra)lp.insertAdjacentHTML('beforeend',extra);logEl.append(lp);logEl.scrollTop=1e6;
   let i=0;const typ=()=>{if(tok!==sayTok)return;sayEl.textContent=text.slice(0,i+=2);if(i<text.length)setTimeout(typ,reduce?0:18)};typ();
-  const talkOn=()=>{talking=true;coreEl.classList.add('talk')},talkOff=()=>{if(tok!==sayTok)return;talking=false;coreEl.classList.remove('talk')};
-  if(voiceOn&&synth&&voice){synth.cancel();const u=new SpeechSynthesisUtterance((spoken||text).replace(/[«»]/g,''));u.voice=voice;u.lang=voice.lang;u.rate=persona==='grumpy'?.98:1.05;u.pitch=persona==='grumpy'?.7:.9;u.onstart=talkOn;u.onend=u.onerror=talkOff;synth.speak(u);setTimeout(talkOff,Math.max(3000,(spoken||text).length*110))}
-  else{talkOn();setTimeout(talkOff,Math.min(4000,600+text.length*40))}}
+  const talkOn=()=>{talking=true;coreEl.classList.add('talk');if(voiceOn&&voice)window.nfMusic?.duck(true)},talkOff=()=>{if(tok!==sayTok)return;talking=false;coreEl.classList.remove('talk');window.nfMusic?.duck(false)};
+  if(voiceOn&&synth&&voice){synth.cancel();stopDrums();const sh=persona==='shaman';const u=new SpeechSynthesisUtterance((spoken||text).replace(/[«»]/g,''));u.voice=voice;u.lang=voice.lang;u.rate=persona==='grumpy'?.98:1.05;u.pitch=persona==='grumpy'?.7:.9;
+    u.onstart=talkOn;u.onend=u.onerror=()=>{stopDrums();talkOff()};if(sh){shamanFx();setTimeout(()=>{if(tok===sayTok)synth.speak(u)},380)}else synth.speak(u);setTimeout(()=>{if(tok===sayTok)stopDrums();talkOff()},Math.max(3500,(spoken||text).length*125))}
+  else{talkOn();if(voiceOn&&persona==='shaman')shamanFx();setTimeout(talkOff,Math.min(4000,600+text.length*40))}}
 function userLine(t){const p=document.createElement('p');p.className='u';p.textContent=t;logEl.append(p);logEl.scrollTop=1e6}
 
 /* распознавание речи */
@@ -226,7 +235,7 @@ function listen(){if(!SR)return;if(!isSecureContext){say('Микрофон бр�
   rec.onstart=()=>{listening=true;coreEl.classList.add('listen');micB.classList.add('on');$h('#hd-st').textContent='слушаю…'};
   rec.onresult=e=>{let t='';for(const r of e.results){t+=r[0].transcript;if(r.isFinal)fin=t}inp.value=t};
   rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')say('Нет доступа к микрофону. Разрешите его в настройках сайта в браузере.');else if(e.error==='no-speech')say('Ничего не услышал. Попробуйте ещё раз.')};
-  rec.onend=()=>{listening=false;coreEl.classList.remove('listen');micB.classList.remove('on');$h('#hd-st').textContent='в сети';if(fin){inp.value='';window.ach?.('voice');handle(fin)}};
+  rec.onend=()=>{listening=false;coreEl.classList.remove('listen');micB.classList.remove('on');$h('#hd-st').textContent=persona==='shaman'?'духи в сети':'в сети';if(fin){inp.value='';window.ach?.('voice');handle(fin)}};
   try{rec.start()}catch(e){}}
 
 /* ---------- команды ---------- */
@@ -248,10 +257,22 @@ const plural=(n,a,b,c)=>{n=Math.abs(n)%100;const m=n%10;return n>10&&n<20?c:m>1&
 /* характер и имя */
 let persona=store.get('nefor-hud-persona','polite'),uname=store.get('nefor-hud-name','');
 const GRUMP=['Опять вы. Ладно.','Вздыхаю, но делаю.','Это можно было загуглить, но держите.','Без заявки вообще-то не положено. Ладно.','Отвлекаете от важного: я смотрел на логи.','Так и быть.'];
-function reply(text,extra,spoken){if(persona==='grumpy'&&Math.random()<.45)text=pick(GRUMP)+' '+text;say(text,extra,spoken)}
-function setPersonaBtn(){const b=$h('#hd-pers');if(b)b.textContent=persona==='grumpy'?'ворчун':'вежливый';b.title='Характер ассистента. Нажми, чтобы сменить'}
-function setPersona(p){persona=p;store.set('nefor-hud-persona',p);setPersonaBtn();
-  say(p==='grumpy'?'Режим ворчуна. Работать буду, но молча осуждая. Вслух тоже.':'Вежливый режим. Чем могу помочь?')}
+const SH_PRE=['Хе-хе-хе!','Духи сети шепчут:','Кости брошены.','Шаман видит.','О-хо-хо!','Бубен говорит:'],SH_POST=['Хе-хе.','Так сказали духи.','Не гневи провайдера.','Ха-ха-ха!'];
+function reply(text,extra,spoken){if(persona==='grumpy'&&Math.random()<.45)text=pick(GRUMP)+' '+text;
+  else if(persona==='shaman'){if(Math.random()<.55)text=pick(SH_PRE)+' '+text;if(Math.random()<.3)text+=' '+pick(SH_POST);if(spoken)spoken=text.split('.')[0]+'. '+spoken}say(text,extra,spoken)}
+const PERS={polite:'вежливый',grumpy:'ворчун',shaman:'шаман'},PNEXT={polite:'grumpy',grumpy:'shaman',shaman:'polite'};
+function setPersonaBtn(){const b=$h('#hd-pers');if(b){b.textContent=PERS[persona]||'вежливый';b.title='Характер ассистента. Нажми, чтобы сменить'}HUD.classList.toggle('shaman',persona==='shaman');const st=$h('#hd-st');if(st&&!listening)st.textContent=persona==='shaman'?'духи в сети':'в сети'}
+function setPersona(p){persona=p;store.set('nefor-hud-persona',p);setPersonaBtn();if(p==='shaman')window.ach?.('shaman');
+  say(p==='grumpy'?'Режим ворчуна. Работать буду, но молча осуждая. Вслух тоже.':p==='shaman'?'Хе-хе-хе! Шаман НЕФОР пришёл. Бью в бубен, изгоняю баги, задабриваю духов DNS. Спрашивай.':'Вежливый режим. Чем могу помочь?')}
+/* звуки шамана: бубен и трещотка, синтез через Web Audio */
+let drumT=0;function aud(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();return actx}catch(e){return null}}
+function drum(t,vol=.5){const a=aud();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(42,t+.28);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+.35);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+.4)}
+function rattle(t,vol=.12){const a=aud();if(!a)return;const n=Math.floor(a.sampleRate*.12),buf=a.createBuffer(1,n,a.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2)*(i%900<450?1:.3);
+  const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=buf;f.type='bandpass';f.frequency.value=3800;f.Q.value=1.2;g.gain.value=vol;s.connect(f);f.connect(g);g.connect(a.destination);s.start(t)}
+function shamanFx(){const a=aud();if(!a)return;const t=a.currentTime+.02;drum(t);drum(t+.17,.35);rattle(t+.3);drum(t+.42,.45)}
+function startDrums(){stopDrums();let k=0;drumT=setInterval(()=>{const a=aud();if(!a)return;const t=a.currentTime;drum(t,k%4===0?.2:.11);if(k%2)rattle(t+.13,.05);k++},430)}
+function stopDrums(){if(drumT){clearInterval(drumT);drumT=0}}
 
 /* ----- утилиты ----- */
 const ip2n=s=>{const p=s.split('.').map(Number);if(p.length!==4||p.some(x=>!(x>=0&&x<=255)))return null;return((p[0]<<24)>>>0)+(p[1]<<16)+(p[2]<<8)+p[3]};
@@ -389,7 +410,7 @@ function quiz(){const Q=[...KB().QUIZ].sort(()=>Math.random()-.5).slice(0,10);if
   const ask=()=>{const[q,o]=Q[i];say(`Вопрос ${i+1} из ${Q.length}. ${q}`,`<div class="hd-opts">${o.map((x,k)=>`<button type="button" class="hd-ex" data-c="${k+1}">${k+1}. ${h(x)}</button>`).join('')}</div>`,`Вопрос ${i+1}. ${q} ${o.map((x,k)=>`${k+1}: ${x}.`).join(' ')}`)};
   pending=(q)=>{const[,o,ok,ex]=Q[i];let a=-1;for(const k in ORD)if(ORD[k].test(q))a=k-1;if(a<0)a=o.findIndex(x=>norm(x)===q||norm(x).startsWith(q)&&q.length>2);
     if(a<0){say('Ответьте номером варианта: от 1 до 4.');return}const right=a===ok;if(right)sc++;
-    const fb=right?pick(persona==='grumpy'?['Верно. Не ожидал.','Правильно. Случайно, наверное.']:['Верно!','Правильно, отлично.','Точно!']):(persona==='grumpy'?'Мимо. ':'Не совсем. ')+`Правильный ответ: ${o[ok]}.`;
+    const fb=right?pick(persona==='shaman'?['Духи довольны! Верно.','Хе-хе, точно!']:persona==='grumpy'?['Верно. Не ожидал.','Правильно. Случайно, наверное.']:['Верно!','Правильно, отлично.','Точно!']):(persona==='grumpy'?'Мимо. ':'Не совсем. ')+`Правильный ответ: ${o[ok]}.`;
     i++;if(i<Q.length){say(`${fb} ${ex}`);setTimeout(ask,reduce?50:1800)}else{pending=null;if(sc>=8)window.ach?.('hudquiz');
       say(`${fb} Викторина окончена: ${sc} из ${Q.length}. ${sc>=9?'Уровень: сеньор. Возьмите себе зарплату побольше.':sc>=7?'Уровень: мидл. Крепко.':sc>=4?'Уровень: джун. Есть куда расти.':'Уровень: стажёр. Начните с раздела «Для всех».'}`)}};
   say(`Викторина для админов: ${Q.length} вопросов. Отвечайте номером варианта. Скажите «стоп», чтобы выйти.`);setTimeout(ask,reduce?50:1600)}
@@ -406,14 +427,21 @@ function fun(raw,q){if(/монетк|орел или решк|орёл или р
 function helpCard(){const G=[['Сайт',['открой игры','покажи кейсы','включи компьютер','паника']],['Утилиты',['подсеть 192.168.1.0/26','мой IP','dns mx ya.ru','что за порт 3389','объясни cron */15 9-18 * * 1-5','base64 привет','md5 test','uuid','chmod 755','unix 1700000000','сколько качать 50 гб на 100 мбит']],
   ['Справочник',['ошибка 0x80070005','ошибка 1219','код 502','event 4740','как разблокировать пользователя','как пробросить порт на микротике','как очистить очередь печати']],
   ['Дежурство',['таймер на 5 минут','напомни через 10 минут проверить бэкап','помодоро','сколько до пятницы','до конца рабочего дня','погода в Москве']],
-  ['Характер и игры',['режим ворчуна','вежливый режим','меня зовут Саша','викторина','угадай порт','кинь кубик','выбери пицца или суши']],['Система',['диагностика','статус','пинг','сгенерируй пароль','расскажи байку','отмазка']]];
+  ['Характер и игры',['режим ворчуна','режим шамана','вежливый режим','смени голос','меня зовут Саша','викторина','угадай порт','кинь кубик','выбери пицца или суши']],['Система',['диагностика','статус','пинг','сгенерируй пароль','расскажи байку','отмазка']],['Музыка',['включи музыку','следующий трек','что играет','громче','пауза']]];
   return `<div class="hd-help">${G.map(([t,l])=>`<b>${t}</b><div>${l.map(chip).join('')}</div>`).join('')}</div>`}
 
 async function handle(raw){raw=String(raw||'').trim();const q=norm(raw);if(!q)return;userLine(raw);await kbReady;
   const has=r=>r.test(q),ql=raw.toLowerCase().replace(/ё/g,'е').replace(/\s*(слэш|слеш|дробь)\s*/g,'/').replace(/(\d)\s+точка\s+(?=\d)/g,'$1.');
   if(pending){if(has(/^(стоп|хватит|выход|отмена|закончить|надоело)/)){pending=null;return say('Игра остановлена.')}pending(q,raw);return}
-  if(has(/^(выход|выйти|закрой(ся)?|отключись|пока|до свидания|хватит)(?=\s|$)/)||has(/выключ(и|ись) (себя|ассистент|нефор)/))return go(()=>{},persona==='grumpy'?'Наконец-то. Отключаюсь.':'Отключаюсь. Все системы остаются под наблюдением.');
+  if(has(/^(выход|выйти|закрой(ся)?|отключись|пока|до свидания|хватит)(?=\s|$)/)||has(/выключ(и|ись) (себя|ассистент|нефор)/))return go(()=>{},persona==='grumpy'?'Наконец-то. Отключаюсь.':persona==='shaman'?'Шаман уходит в дым. Хе-хе-хе!':'Отключаюсь. Все системы остаются под наблюдением.');
   if(has(/диагност|сканир|просканир|проверь (комп|пк|систем|машин)/))return scan();
+  const MU=window.nfMusic;
+  if(MU&&has(/(включи|поставь|запусти|вруби|давай) (музык|песн|трек)|^музык\S*$|^плеер$/)){const ok=await MU.play();return say(ok?`Играет «${MU.title}».`:'Браузер не дал включить музыку. Нажмите на кнопку с нотой в углу сайта.')}
+  if(MU&&has(/(выключи|останови|убери|стоп|пауза|хватит) (музык|песн|трек)|^пауза$/)){MU.pause();return say('Музыка на паузе.')}
+  if(MU&&has(/(следующ|другой|другую|переключи|дальше).{0,10}(трек|песн)|^следующий$|^дальше$/)){MU.next();return say('Следующий трек.')}
+  if(MU&&has(/предыдущ.{0,8}(трек|песн)|^назад$/)){MU.prev();return say('Предыдущий трек.')}
+  if(MU&&has(/что (сейчас )?играет|как называется (песня|трек)/))return say(MU.playing?`Играет «${MU.title}».`:'Сейчас тихо. Скажите «включи музыку».');
+  if(MU&&MU.playing&&has(/^(громче|тише)|(сделай|музык\S*) (громче|тише)/)){MU.vol(has(/громче/)?.15:-.15);return say(`Громкость музыки ${Math.round(MU.volume*100)}%.`)}
   /* утилиты с явными данными */
   if(subnet(ql)||base64(raw,q)||await hashCmd(raw,q)||errCode(q,raw)||eventId(q)||chmod(q)||cron(raw)||unix(q)||speed(ql))return;
   if(has(/^(uuid|guid)|(сгенерируй|создай|дай) (uuid|guid)/)){const u=uuid();return reply('Новый UUID.',codeBox(u,'uuid'))}
@@ -425,8 +453,10 @@ async function handle(raw){raw=String(raw||'').trim();const q=norm(raw);if(!q)re
   /* характер, имя, игры */
   if(has(/ворчун|ворчлив|будь (злым|грубым|дерзким)|дерзк\S* режим/))return setPersona('grumpy');
   if(has(/вежлив|будь (добрее|добрым|милым)|нормальный режим/))return setPersona('polite');
-  if(has(/смени характер|другой характер/))return setPersona(persona==='grumpy'?'polite':'grumpy');
-  let m=/(?:меня зовут|зови меня|мое имя|моё имя)\s+([а-яёa-z-]{2,20})/i.exec(raw);if(m){uname=m[1][0].toUpperCase()+m[1].slice(1).toLowerCase();store.set('nefor-hud-name',uname);return reply(persona==='grumpy'?`Записал: ${uname}. Теперь не отвертитесь.`:`Приятно познакомиться, ${uname}. Запомнил.`)}
+  if(has(/шаман|вуду|колдун|бубен|знахар/))return setPersona('shaman');
+  if(has(/смени характер|другой характер/))return setPersona(PNEXT[persona]||'polite');
+  if(has(/(смени|другой|следующий|поменяй) голос/)){const v=ruVoices();if(!v.length)return say('В браузере нет русских голосов. Отвечу текстом.');const i=(v.indexOf(voice)+1)%v.length;voice=v[i];store.set('nefor-hud-vname',voice.name);return say(`Голос: ${voice.name}. Всего русских голосов: ${v.length}.`)}
+  let m=/(?:меня зовут|зови меня|мое имя|моё имя)\s+([а-яёa-z-]{2,20})/i.exec(raw);if(m){uname=m[1][0].toUpperCase()+m[1].slice(1).toLowerCase();store.set('nefor-hud-name',uname);return reply(persona==='shaman'?`Духи запомнили имя: ${uname}. Хе-хе.`:persona==='grumpy'?`Записал: ${uname}. Теперь не отвертитесь.`:`Приятно познакомиться, ${uname}. Запомнил.`)}
   if(has(/как меня зовут|ты помнишь мое имя|кто я/))return reply(uname?`Вы ${uname}. Я помню.`:'Вы не представились. Скажите: «меня зовут…»');
   if(has(/забудь (мое |моё )?имя/)){uname='';store.set('nefor-hud-name','');return reply('Имя забыл. Вы снова таинственный незнакомец.')}
   if(has(/викторин|экзамен|проверь мои знания|квиз/))return quiz();
@@ -442,7 +472,7 @@ async function handle(raw){raw=String(raw||'').trim();const q=norm(raw);if(!q)re
   if(howto(q,false))return;
   if(has(/пароль/)){const pw=genPw();return reply('Пароль готов: шестнадцать символов, без похожих букв. Нажмите, чтобы скопировать.',codeBox(pw,'пароль'),'Пароль готов, он на экране.')}
   if(has(/пинг|задержк/)){const p=await measurePing();return reply(p!=null?`Пинг до ne-for.ru: ${p} миллисекунд. ${p<60?'Отлично.':p<150?'Нормально.':'Медленновато. Проверьте, не качает ли кто-то сериалы.'}`:'Сайт не отвечает. Это не я, это DNS.')}
-  if(has(/статус|сводк|систем|отчет|как (дела|ты|жизнь)|все в норме/))return reply(has(/как (дела|ты|жизнь)/)?(persona==='grumpy'?'Как у всех в IT: всё горит, но стабильно. ':'Все системы в норме. Кроме принтера, но это его обычное состояние. ')+statusText():statusText());
+  if(has(/статус|сводк|систем|отчет|как (дела|ты|жизнь)|все в норме/))return reply(has(/как (дела|ты|жизнь)/)?(persona==='shaman'?'Духи спокойны, бубен цел. ':persona==='grumpy'?'Как у всех в IT: всё горит, но стабильно. ':'Все системы в норме. Кроме принтера, но это его обычное состояние. ')+statusText():statusText());
   if(has(/байк|истори|анекдот|шутк|пошути|смешн/)){const s=Math.random()<.5&&window.ST_LIST?pick(window.ST_LIST):(window.genStory?.()||pick(window.ST_LIST||['Байки ещё грузятся.']));return say(s)}
   if(has(/отмаз|оправдан|почему не работает|что сломалось/)){let e='Это DNS. Всегда DNS.';try{if(typeof excuse==='function')e=excuse()}catch(_){}return say(e)}
   if(has(/тем[ау] сайта|смени тему|цвет сайта/)){document.getElementById('themeBtn')?.click();return reply('Тема сайта переключена. Мне идёт голубой, я останусь в нём.')}
@@ -454,12 +484,12 @@ async function handle(raw){raw=String(raw||'').trim();const q=norm(raw);if(!q)re
   if(has(/аргус/))return reply('Аргус — моё старое имя. Сменил его вместе с прошивкой.');
   if(has(/джарвис|пятниц/))return reply('Коллега в отпуске. Я за него. Костюм не выдали, но подсеть посчитать могу.');
   if(has(/что умеешь|помощь|помоги|команды|help|список команд/))return say('Вот что я умею. Нажмите на любой пример или скажите его голосом.',helpCard(),'Я умею работать с сайтом, считать подсети и коды ошибок, давать готовые команды, ставить таймеры, показывать погоду и играть в викторину. Примеры на экране.');
-  if(has(/привет|здравствуй|здорово|хай|добр(ое|ый) /))return say(persona==='grumpy'?`${uname?uname+', опять':'Опять'} вы. Ну, привет. Что сломалось?`:`${greet()}${uname?', '+uname:''}. Все системы в норме. Чем займёмся?`);
-  if(has(/спасибо|благодар|молодец|красав/))return say(persona==='grumpy'?pick(['Спасибо на хлеб не намажешь. Но приятно.','Запишу в отчёт о полезности. Его никто не читает.']):pick(['Всегда к вашим услугам.','Обращайтесь. Я всё равно никуда не денусь.','Рад стараться.']));
+  if(has(/привет|здравствуй|здорово|хай|добр(ое|ый) /))return say(persona==='shaman'?`Хе-хе! ${uname||'Путник'}, духи ждали тебя. Что сломалось?`:persona==='grumpy'?`${uname?uname+', опять':'Опять'} вы. Ну, привет. Что сломалось?`:`${greet()}${uname?', '+uname:''}. Все системы в норме. Чем займёмся?`);
+  if(has(/спасибо|благодар|молодец|красав/))return say(persona==='shaman'?pick(['Духи довольны. Хе-хе.','Принеси духам кофе, и мы в расчёте.']):persona==='grumpy'?pick(['Спасибо на хлеб не намажешь. Но приятно.','Запишу в отчёт о полезности. Его никто не читает.']):pick(['Всегда к вашим услугам.','Обращайтесь. Я всё равно никуда не денусь.','Рад стараться.']));
   if(has(/кофе/))return reply('Кофеварка не подключена к сети. Заявка создана, срок решения: никогда.');
   if(has(/перезагру/)){say('Перезагружаюсь. Не выключайте компьютер.');HUD.classList.remove('ready');await sleep(1200);HUD.classList.add('ready');return say('Готово. Помогло? Обычно помогает.')}
   if(has(/rm -rf|удали все|снеси/))return reply('Отказано. Я видел, что стало с ne-forOS.');
-  say(persona==='grumpy'?pick(['Не понял. И не хочу. Скажите «что умеешь».','Это не ко мне. Создайте заявку. Или скажите «что умеешь».']):pick(['Команда не распознана. Скажите «что умеешь», там примеры.','Не понял. Попробуйте: «подсеть 10.0.0.0/24», «таймер 5 минут» или «викторина».','Это за пределами моих протоколов. Пока. Скажите «что умеешь».']))}
+  say(persona==='shaman'?pick(['Духи не поняли твоих слов. Скажи «что умеешь».','Бубен молчит. Спроси иначе или скажи «что умеешь».']):persona==='grumpy'?pick(['Не понял. И не хочу. Скажите «что умеешь».','Это не ко мне. Создайте заявку. Или скажите «что умеешь».']):pick(['Команда не распознана. Скажите «что умеешь», там примеры.','Не понял. Попробуйте: «подсеть 10.0.0.0/24», «таймер 5 минут» или «викторина».','Это за пределами моих протоколов. Пока. Скажите «что умеешь».']))}
 
 /* ---------- диагностика ---------- */
 const JOKES=['Вкладок в браузере больше, чем нужно. Точное число скрыто из милосердия.','Последняя перезагрузка: предположительно в прошлом квартале.','Пароль на стикере под клавиатурой не обнаружен. Уважаю.',
@@ -467,7 +497,7 @@ const JOKES=['Вкладок в браузере больше, чем нужно
  'Уровень кофе у пользователя: требует пополнения.','Принтер недоступен. Как всегда.','Файл «финал_финал_точно_финал.docx» найден.','Кабель мыши запутан с зарядкой. Классика.','Антивирус работает и мешает. Всё штатно.'];
 let scanning=false;
 async function scan(){if(scanning)return;scanning=true;window.ach?.('scan');const btn=$h('#hd-scan');btn.disabled=true;$h('#hd-rep').classList.remove('on');$h('#hd-dst').textContent='идёт скан';
-  const ol=$h('#hd-steps'),prog=$h('#hd-prog');ol.innerHTML='';prog.style.width='0';say('Запускаю полную диагностику. Не трогайте мышь. Шучу, трогайте.');
+  const ol=$h('#hd-steps'),prog=$h('#hd-prog');ol.innerHTML='';prog.style.width='0';say(persona==='shaman'?'Бросаю кости на твой компьютер. Хе-хе-хе…':'Запускаю полную диагностику. Не трогайте мышь. Шучу, трогайте.');
   const p=await measurePing();let score=100;const cores=nav.hardwareConcurrency||0,mem=nav.deviceMemory||0;
   const S=[
    ['Процессор',cores?`${cores} потоков`:'данные скрыты',cores>=8?'ok':cores>=4?'w':cores?'bad':'w',cores>=8?0:cores>=4?-8:cores?-18:-4],
@@ -498,9 +528,9 @@ async function on(mode){if(running){if(mode==='scan')scan();return}running=true;
   HUD.classList.add('ready');raf=requestAnimationFrame(loop);
   drawDuty();setPersonaBtn();timers.push(setInterval(()=>{rows();clock();drawDuty()},1000),setInterval(measurePing,3000));measurePing();
   const n=store.get('nefor-hud-n',0)+1;store.set('nefor-hud-n',n);
-  await sleep(400);say(`${greet()}${uname?', '+uname:''}. ${n>1?'С возвращением.':'Я НЕФОР, ассистент этого сайта.'} ${persona==='grumpy'?'Опять работать.':'Все системы в норме.'} ${SR&&isSecureContext?'Нажмите на микрофон и скажите команду':'Напишите команду'} или скажите «что умеешь».`);
+  await sleep(400);say(`${greet()}${uname?', '+uname:''}. ${n>1?'С возвращением.':'Я НЕФОР, ассистент этого сайта.'} ${persona==='shaman'?'Хе-хе! Духи сети проснулись.':persona==='grumpy'?'Опять работать.':'Все системы в норме.'} ${SR&&isSecureContext?'Нажмите на микрофон и скажите команду':'Напишите команду'} или скажите «что умеешь».`);
   if(mode==='scan')setTimeout(scan,1600);else setTimeout(()=>matchMedia('(pointer:fine)').matches&&inp.focus(),300)}
-async function off(){if(!running)return;running=false;timers.forEach(clearInterval);timers=[];cancelAnimationFrame(raf);try{rec?.abort()}catch(e){}synth?.cancel();sayTok++;talking=listening=false;
+async function off(){if(!running)return;running=false;stopDrums();timers.forEach(clearInterval);timers=[];cancelAnimationFrame(raf);try{rec?.abort()}catch(e){}synth?.cancel();sayTok++;talking=listening=false;
   HUD.classList.add('off');HUD.classList.remove('on');await sleep(420);HUD.hidden=true;HUD.classList.remove('off','ready');document.body.style.overflow=''}
 window.hudOn=on;window.hudOff=off;
 
@@ -512,7 +542,7 @@ $h('#hd-scan').onclick=scan;coreEl.onclick=()=>SR&&isSecureContext?(listening?re
 logEl.addEventListener('click',e=>{const p=e.target.closest('[data-copy]');if(p){typeof copy==='function'?copy(p.dataset.copy):navigator.clipboard?.writeText(p.dataset.copy);p.textContent='скопировано';setTimeout(()=>p.textContent='копировать',1400);return}
   const c=e.target.closest('[data-c]');if(c)handle(c.dataset.c)});
 $h('#hd-duty').addEventListener('click',e=>{const x=e.target.closest('[data-tm-x]');if(x){TM=TM.filter(t=>String(t.id)!==x.dataset.tmX);saveTm();drawDuty()}if(e.target.closest('[data-pomo-x]')){pomo=null;saveTm();drawDuty()}});
-$h('#hd-pers').onclick=()=>setPersona(persona==='grumpy'?'polite':'grumpy');
+$h('#hd-pers').onclick=()=>setPersona(PNEXT[persona]||'polite');
 ensureTick();
 addEventListener('keydown',e=>{if(HUD.hidden)return;if(e.key==='Escape'){e.preventDefault();off()}},true);
 addEventListener('resize',()=>{if(!HUD.hidden)bg()});
